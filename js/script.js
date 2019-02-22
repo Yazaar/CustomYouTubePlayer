@@ -332,7 +332,7 @@ for (let i = 0; i < 5; i++) {
 
 for (let i = 0; i < document.getElementById("PlayerSettings").querySelectorAll("span").length; i++) { 
   document.getElementById("PlayerSettings").querySelectorAll("span")[i].addEventListener("mouseleave", (e) => {
-  document.getElementById("StatusMessage").innerHTML = "Yazaar | YouTube Fork"
+  document.getElementById("StatusMessage").innerHTML = "Yazaar | YouTube Player"
   })
 }
 
