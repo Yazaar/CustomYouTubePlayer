@@ -1,4 +1,4 @@
-# CustomYouTubePlayer
+# Custom YouTube Player | By: Yazaar
 <h1>Link to website:</h1>
 <h1>https://yazaar.github.io/CustomYouTubePlayer/</h1>
 <p>Thanks for checking my player out!<br>//Yazaar</p>
