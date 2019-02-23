@@ -137,7 +137,6 @@ function RunSearch(){
                 data[i].snippet.thumbnails = {}
                 data[i].snippet.thumbnails.default = {}
                 data[i].snippet.thumbnails.default.url = "img/no_thumbnail.jpg"
-                console.log(data[i])
               }
               InnerHTMLData += '<section onclick="GetVideoID(this)" data-videoid="' + data[i].snippet.resourceId.videoId + '">' + '<img src="' + data[i].snippet.thumbnails.default.url + '">' + "<span>" + "<h1>" + data[i].snippet.title + "</h1>" + "<p>" + data[i].snippet.channelTitle + "</p>" + "</span>" + "</section>"
               video_data[data[i].snippet.resourceId.videoId] = data[i]
@@ -197,7 +196,6 @@ window.addEventListener("scroll", () => {
         loading = true
         
         if (! JSON.parse(xml.response).nextPageToken) {
-          console.log("All Loaded!")
           MorePages = false
           loading = false
           return
@@ -289,13 +287,14 @@ document.getElementById("shuffle").addEventListener("click", () => {
 })
 
 document.getElementById("youtube").addEventListener("click", () => {
-
-  if (CurrentlyPlaying.kind == "youtube#playlistItem"){
-    console.log("A")
-    window.open("https://www.youtube.com/watch?v="+CurrentlyPlaying.snippet.resourceId.videoId)
-  } else {
-    console.log("B")
-    window.open("https://www.youtube.com/watch?v="+CurrentlyPlaying.id.videoId)
+  try{
+    if (CurrentlyPlaying.kind == "youtube#playlistItem"){
+      window.open("https://www.youtube.com/watch?v="+CurrentlyPlaying.snippet.resourceId.videoId)
+    } else {
+      window.open("https://www.youtube.com/watch?v="+CurrentlyPlaying.id.videoId)
+    }
+  } catch {
+    {}
   }
 })
 
@@ -332,7 +331,7 @@ for (let i = 0; i < 5; i++) {
 
 for (let i = 0; i < document.getElementById("PlayerSettings").querySelectorAll("span").length; i++) { 
   document.getElementById("PlayerSettings").querySelectorAll("span")[i].addEventListener("mouseleave", (e) => {
-  document.getElementById("StatusMessage").innerHTML = "Yazaar | YouTube Fork"
+  document.getElementById("StatusMessage").innerHTML = "Yazaar | YouTube Player"
   })
 }
 
