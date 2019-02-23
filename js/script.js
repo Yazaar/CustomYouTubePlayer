@@ -80,7 +80,7 @@ function onPlayerStateChange(event) {
 
       let InnerHTMLData = "<h1>Queue:</h1>"
       for (i in queue){
-        InnerHTMLData += "<p>" + queue[i].snippet.title + "</p>"
+        InnerHTMLData += "<section><p>" + queue[i].snippet.title + "</p></section>"
       }
       document.getElementById("queue").innerHTML = InnerHTMLData
     }
@@ -262,7 +262,7 @@ document.getElementById("skip").addEventListener("click", () => {
 
     let InnerHTMLData = "<h1>Queue:</h1>"
     for (i in queue){
-      InnerHTMLData += "<p>" + queue[i].snippet.title + "</p>"
+      InnerHTMLData += "<section><p>" + queue[i].snippet.title + "</p></section>"
     }
     document.getElementById("queue").innerHTML = InnerHTMLData
   }
@@ -351,7 +351,7 @@ document.getElementById("queue").addEventListener("click", (e) => {
       let CodeBlock = "<h1>Queue:</h1>"
 
       for (i in queue) {
-        CodeBlock += "<p>" + queue[i].snippet.title + "</p>"
+        CodeBlock += "<section><p>" + queue[i].snippet.title + "</p></section>"
       }
       document.getElementById("queue").innerHTML = CodeBlock
 
@@ -373,7 +373,7 @@ document.getElementById("queue").addEventListener("click", (e) => {
       let CodeBlock = "<h1>Queue:</h1>"
 
       for (i in queue) {
-        CodeBlock += "<p>" + queue[i].snippet.title + "</p>"
+        CodeBlock += "<section><p>" + queue[i].snippet.title + "</p></section>"
       }
       document.getElementById("queue").innerHTML = CodeBlock
 
@@ -392,7 +392,7 @@ document.getElementById("queue").addEventListener("click", (e) => {
       let CodeBlock = "<h1>Queue:</h1>"
 
       for (i in queue) {
-        CodeBlock += "<p>" + queue[i].snippet.title + "</p>"
+        CodeBlock += "<section><p>" + queue[i].snippet.title + "</p></section>"
       }
       document.getElementById("queue").innerHTML = CodeBlock
       
@@ -412,7 +412,7 @@ document.getElementById("queue").addEventListener("click", (e) => {
       let CodeBlock = "<h1>Queue:</h1>"
 
       for (i in queue) {
-        CodeBlock += "<p>" + queue[i].snippet.title + "</p>"
+        CodeBlock += "<section><p>" + queue[i].snippet.title + "</p></section>"
       }
       document.getElementById("queue").innerHTML = CodeBlock
 
@@ -452,7 +452,7 @@ function GetVideoID(data_tag){
         document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
       } else {
         queue.push(video_data[video_id])
-        document.getElementById("queue").innerHTML += "<p>" + queue[queue.length-1].snippet.title + "</p>"
+        document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length-1].snippet.title + "</p></section>"
       }
     }
     return
@@ -471,7 +471,7 @@ function GetVideoID(data_tag){
       document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
     } else {
       queue.push(video_data[video_id])
-      document.getElementById("queue").innerHTML += "<p>" + queue[queue.length-1].snippet.title + "</p>"
+      document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length-1].snippet.title + "</p></section>"
     }
   }
 }
