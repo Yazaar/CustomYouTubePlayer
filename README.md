@@ -5,7 +5,6 @@
 <p>Warning, this project may not be perfect. I did this to experiment with the YouTube API</p>
 <br>
 <h1>How to use the player:</h1>
-<h3>Add videos:<h3>
 <p>Find the search box, treat it like a youtube search bar<br>Click on the videos that you want to add</p>
 <p>You may as well view a specific playlist, this can be done by searing with a playlist url, for example:<br>https://www.youtube.com/playlist?list=PLYH8WvNV1YEn_iiBMZiZ2aWugQfN1qVfM</p>
 <p>Requirements for playlist url:<br>1: contain "youtube.com/playlist?"<br>2: contain "list=[list-id]"</p>
