@@ -1,5 +1,8 @@
 // 2. This code loads the IFrame Player API code asynchronously.
 
+//API KEY: AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40
+// encodeURI()
+
 let xml
 let loading = false
 let data
@@ -15,9 +18,6 @@ let SearchMethod
 let CurrentSearchMethod
 let listId
 
-// Overlay
-let OverlayToggle = false
-let TimeUpdater
 var tag = document.createElement('script');
 
 tag.src = "https://www.youtube.com/iframe_api";
@@ -69,6 +69,8 @@ function onPlayerStateChange(event) {
       }
 
       CurrentlyPlaying = queue[index]
+      document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = queue[index].snippet.title
+      document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = queue[index].snippet.channelTitle
       if (LockStatus == true){
         queue.push(queue[index])
         queue.splice(index, 1)
@@ -87,7 +89,6 @@ function onPlayerStateChange(event) {
   if (event.data == YT.PlayerState.PLAYING) {
     document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = player.getVideoData().title
     document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = player.getVideoData().author
-    updateOverlay()
   }
 }
 
@@ -249,7 +250,6 @@ document.getElementById("skip").addEventListener("click", () => {
     CurrentlyPlaying = queue[index]
     document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = queue[index].snippet.title
     document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = queue[index].snippet.channelTitle
-    updateOverlay()
 
     if (LockStatus == true){
       queue.push(queue[index])
@@ -443,14 +443,12 @@ function GetVideoID(data_tag){
       document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
       document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
       StartYouTubeIframe(video_id)
-      updateOverlay()
     } else {
       if (PlayerState == 0){
         player.loadVideoById(video_id)
         CurrentlyPlaying = video_data[video_id]
         document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
         document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
-        updateOverlay()
       } else {
         queue.push(video_data[video_id])
         document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length-1].snippet.title + "</p></section>"
@@ -464,85 +462,15 @@ function GetVideoID(data_tag){
     document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
     document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
     StartYouTubeIframe(video_id)
-    updateOverlay()
   } else {
     if (PlayerState == 0){
       player.loadVideoById(video_id)
       CurrentlyPlaying = video_data[video_id]
       document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
       document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
-      updateOverlay()
     } else {
       queue.push(video_data[video_id])
       document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length-1].snippet.title + "</p></section>"
     }
   }
-}
-
-/* CODE FOR OVERLAY */
-
-function updateOverlay() {
-  if (OverlayToggle == true){
-    document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.snippet.thumbnails.default.url + '" alt="Video Thumbnail">'
-    document.getElementById("title").innerHTML = document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML
-    document.getElementById("channel").innerHTML = document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML
-
-    document.getElementById("time").style.background = generateRGB()
-  }
-}
-
-document.getElementById("ToggleOverlay").addEventListener("click", () => {
-  if (OverlayToggle == true) {
-    document.getElementById("OverlaySettings").style.height = "2rem"
-    document.getElementById("OverlaySettings").style.marginTop = "0px"
-    document.getElementById("overlay").style.display = "none"
-    OverlayToggle = false
-    clearInterval(TimeUpdater)
-  } else {
-    document.getElementById("OverlaySettings").style.height = "auto"
-    document.getElementById("OverlaySettings").style.marginTop = "110px"
-    document.getElementById("overlay").style.display = "inline-flex"
-    OverlayToggle = true
-    generateOverlay()
-  }
-})
-
-function generateOverlay() {
-
-  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight /0.75) + "px"
-
-  try{
-    document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.snippet.thumbnails.default.url + '" alt="Video Thumbnail">'
-  } catch {
-    {}
-  }
-
-  document.getElementById("title").innerHTML = document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML
-  document.getElementById("channel").innerHTML = document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML
-
-  TimeUpdater = setInterval(() => {
-
-    try {
-      document.getElementById("time").style.width = player.getCurrentTime() / player.getDuration() * 100 + "%"
-    } catch {
-      document.getElementById("time").style.width = "0%"
-    }
-
-  }, 500);
-}
-
-/* CODE FOR OVERLAY */
-
-function generateRGB() {
-  let MyColor = [0,0,0]
-  MyColor[Math.floor(Math.random()*3)] = 255
-
-  let SecondIndex = Math.floor(Math.random()*4)
-
-  if (MyColor[SecondIndex] == 0){
-    MyColor[SecondIndex] = Math.floor(Math.random()*256)
-  } else {
-    MyColor[(SecondIndex + 1) % 2] = Math.floor(Math.random()*256)
-  }
-  return "rgb(" + MyColor[0] + "," + MyColor[1] + "," + MyColor[2] + ")"
 }
