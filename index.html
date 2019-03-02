@@ -10,16 +10,49 @@
 
 </head>
 <body>
+    <section id="overlay">
+            <div id="thumbnail"><img src="img/no_thumbnail.jpg" alt=""></div>
+            <div id="right">
+                <article id="title"></article>
+                <article id="channel"></article>
+            </div>
+            <div id="time"></div>
+    </section>
+
+    <section id="OverlaySettings">
+        <section><span id="ToggleOverlay">Toggle Overlay</span></section>
+        <section>
+            <span class="PresetButton" id="preset1">Preset 1</span>
+            <span class="PresetButton" id="preset2">Preset 2</span>
+            <span class="PresetButton" id="preset3">Preset 3</span>
+        </section>
+        <section>
+            Overlay Width: <input type="number" step=0.1 name="OverlayWidth" id="OverlayWidth">
+        </section>
+        <section>
+            Overlay Height: <input type="number" step=0.1 name="OverlayHeight" id="OverlayHeight">
+        </section>
+        <section>
+            Font Size Title: <input type="number" step=0.1 name="TitleFontSize" id="TitleFontSize">
+        </section>
+        <section>
+                Font Size Channel: <input type="number" step=0.1 name="ChannelFontSize" id="ChannelFontSize">
+            </section>
+        <section>
+            Ticker Speed: <input type="number" step=0.1 name="TickerSpeed" id="TickerSpeed">
+        </section>
+    </section>
+
     <section id="PlayerData">
         <div id="player"></div>
         <section id="CurrentVideoData">
             <section id="Currently-Playing-Title">
                 <h1>Currently playing:</h1>
-                <p>No Video</p>
+                <p>Title</p>
             </section>
             <section id="Currently-Playing-Channel">
                 <h1>Channel:</h1>
-                <p>No Video</p>
+                <p>Channel</p>
             </section>
         </section>
     </section>

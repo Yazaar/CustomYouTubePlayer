@@ -1,5 +1,8 @@
 // 2. This code loads the IFrame Player API code asynchronously.
 
+//API KEY: AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40
+// encodeURI()
+
 let xml
 let loading = false
 let data
@@ -14,13 +17,6 @@ let CurrentlyPlaying
 let SearchMethod
 let CurrentSearchMethod
 let listId
-
-// Overlay
-let OverlayToggle = false
-let TimeUpdater
-let TitleScrollStatus = false
-let ChannelScrollStatus = false
-let PixelsPerSecond = 10
 
 var tag = document.createElement('script');
 
@@ -75,8 +71,6 @@ function onPlayerStateChange(event) {
       CurrentlyPlaying = queue[index]
       document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = queue[index].snippet.title
       document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = queue[index].snippet.channelTitle
-      updateOverlay()
-
       if (LockStatus == true){
         queue.push(queue[index])
         queue.splice(index, 1)
@@ -90,6 +84,11 @@ function onPlayerStateChange(event) {
       }
       document.getElementById("queue").innerHTML = InnerHTMLData
     }
+  }
+
+  if (event.data == YT.PlayerState.PLAYING) {
+    document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = player.getVideoData().title
+    document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = player.getVideoData().author
   }
 }
 
@@ -251,7 +250,6 @@ document.getElementById("skip").addEventListener("click", () => {
     CurrentlyPlaying = queue[index]
     document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = queue[index].snippet.title
     document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = queue[index].snippet.channelTitle
-    updateOverlay()
 
     if (LockStatus == true){
       queue.push(queue[index])
@@ -345,11 +343,6 @@ document.getElementById("queue").addEventListener("click", (e) => {
     })
     let TargetIndex = QueueItems.indexOf(e.target)
     let innerHTML = document.getElementById("QueueClick").innerHTML.toLowerCase()
-
-    CurrentlyPlaying = queue[TargetIndex]
-    document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
-    document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
-    updateOverlay()
 
     if (innerHTML == "remove") {
       queue.splice(TargetIndex ,1)
@@ -450,14 +443,12 @@ function GetVideoID(data_tag){
       document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
       document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
       StartYouTubeIframe(video_id)
-      updateOverlay()
     } else {
       if (PlayerState == 0){
         player.loadVideoById(video_id)
         CurrentlyPlaying = video_data[video_id]
         document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
         document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
-        updateOverlay()
       } else {
         queue.push(video_data[video_id])
         document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length-1].snippet.title + "</p></section>"
@@ -471,285 +462,15 @@ function GetVideoID(data_tag){
     document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
     document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
     StartYouTubeIframe(video_id)
-    updateOverlay()
   } else {
     if (PlayerState == 0){
       player.loadVideoById(video_id)
       CurrentlyPlaying = video_data[video_id]
       document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
       document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
-      updateOverlay()
     } else {
       queue.push(video_data[video_id])
       document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length-1].snippet.title + "</p></section>"
     }
   }
-}
-
-/* CODE FOR OVERLAY */
-
-function updateOverlay() {
-  if (OverlayToggle == true){
-    
-    try {
-      document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.snippet.thumbnails.default.url + '" alt="Video Thumbnail">'
-    } catch {
-      {}
-    }
-    
-    document.getElementById("title").innerHTML = document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML
-    document.getElementById("channel").innerHTML = document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML
-    
-    document.getElementById("time").style.background = generateRGB()
-    
-    document.documentElement.style.setProperty("--TitleScroll", document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth + "px")
-    document.documentElement.style.setProperty("--ChannelScroll", document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth + "px")
-    
-    if (document.getElementById("title").offsetWidth > document.getElementById("right").offsetWidth) {
-      if (TitleScrollStatus != true) {
-        TitleScrollStatus = true
-        document.getElementById("title").style.animation = "TitleScroll " + (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond + "s linear infinite"
-        
-      }
-    } else {
-      if (TitleScrollStatus != false) {
-        TitleScrollStatus = false
-        document.getElementById("title").style.animation = "none"
-      }
-    }
-
-    if (document.getElementById("channel").offsetWidth > document.getElementById("right").offsetWidth) {
-      if (ChannelScrollStatus != true) {
-        ChannelScrollStatus = true
-        document.getElementById("channel").style.animation = "ChannelScroll " + (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond + "s linear infinite"
-      }
-    } else {
-      if (ChannelScrollStatus != false) {
-        ChannelScrollStatus = false
-        document.getElementById("channel").style.animation = "none"
-      }
-    }
-  }
-}
-
-document.getElementById("ToggleOverlay").addEventListener("click", () => {
-  
-  if (OverlayToggle == true) {
-    document.getElementById("OverlaySettings").style.height = "2rem"
-    document.getElementById("OverlaySettings").style.marginTop = "0px"
-    document.getElementById("overlay").style.display = "none"
-    OverlayToggle = false
-    clearInterval(TimeUpdater)
-  } else {
-    document.getElementById("OverlaySettings").style.height = "auto"
-    document.getElementById("overlay").style.display = "inline-flex"
-    OverlayToggle = true
-    generateOverlay()
-    updateOverlay()
-    document.getElementById("OverlaySettings").style.marginTop = document.getElementById("overlay").offsetHeight + 10 + "px"
-  }
-  if (document.getElementById("TitleFontSize").value == "") {
-    document.getElementById("TitleFontSize").value = 14
-    document.getElementById("ChannelFontSize").value = 14
-    document.getElementById("TickerSpeed").value = 10
-    document.getElementById("OverlayWidth").value = 250
-    document.getElementById("OverlayHeight").value = 50
-  }
-})
-
-document.getElementById("TitleFontSize").addEventListener("input", () => {
-  document.getElementById("title").style.fontSize = document.getElementById("TitleFontSize").value + "px"
-  document.documentElement.style.setProperty("--TitleScroll", document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth + "px")
-})
-
-document.getElementById("ChannelFontSize").addEventListener("input", () => {
-  document.getElementById("channel").style.fontSize = document.getElementById("ChannelFontSize").value + "px"
-  document.documentElement.style.setProperty("--ChannelScroll", document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth + "px")
-})
-
-document.getElementById("TickerSpeed").addEventListener("input", () => {
-  PixelsPerSecond = document.getElementById("TickerSpeed").value
-  if (TitleScrollStatus == true) {
-    document.getElementById("title").style.animation = "TitleScroll " + (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond + "s linear infinite"
-  }
-  if (ChannelScrollStatus == true) {
-    document.getElementById("channel").style.animation = "ChannelScroll " + (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond + "s linear infinite"
-  }
-})
-
-document.getElementById("OverlayWidth").addEventListener("input", () => {
-  document.getElementById("overlay").style.width = document.getElementById("OverlayWidth").value + "px"
-  document.documentElement.style.setProperty("--TitleScroll", document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth + "px")
-  document.documentElement.style.setProperty("--ChannelScroll", document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth + "px")
-})
-
-document.getElementById("OverlayHeight").addEventListener("input", () => {
-  document.getElementById("overlay").style.height = document.getElementById("OverlayHeight").value + "px"
-  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight /0.75) + "px"
-  document.getElementById("OverlaySettings").style.marginTop = document.getElementById("overlay").offsetHeight + 10 + "px"
-})
-
-
-document.getElementById("preset1").addEventListener("click", () => {
-  document.getElementById("OverlayWidth").value = 300
-  document.getElementById("overlay").style.width = document.getElementById("OverlayWidth").value + "px"
-
-  document.getElementById("OverlayHeight").value = 75
-  document.getElementById("overlay").style.height = document.getElementById("OverlayHeight").value + "px"
-  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight /0.75) + "px"
-  document.getElementById("OverlaySettings").style.marginTop = document.getElementById("overlay").offsetHeight + 10 + "px"
-
-  document.getElementById("TitleFontSize").value = 25
-  document.getElementById("title").style.fontSize = document.getElementById("TitleFontSize").value + "px"
-
-  document.getElementById("ChannelFontSize").value = 18
-  document.getElementById("channel").style.fontSize = document.getElementById("ChannelFontSize").value + "px"
-
-  document.documentElement.style.setProperty("--TitleScroll", document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth + "px")
-  document.documentElement.style.setProperty("--ChannelScroll", document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth + "px")
-
-  let timer1 = (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond
-  let timer2 = (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond
-
-  if (timer1 < 1) {
-    timer1 = 1
-  } else if (timer1 > 60) {
-    timer1 = 60
-  }
-
-  if (timer2 < 1) {
-    timer2 = 1
-  } else if (timer2 > 60) {
-    timer2 = 60
-  }
-
-  if (TitleScrollStatus == true) {
-    document.getElementById("title").style.animation = "TitleScroll " + timer1 + "s linear infinite"
-  }
-  if (ChannelScrollStatus == true) {
-    document.getElementById("channel").style.animation = "ChannelScroll " + timer2 + "s linear infinite"
-  }
-})
-
-document.getElementById("preset2").addEventListener("click", () => {
-  document.getElementById("OverlayWidth").value = 200
-  document.getElementById("overlay").style.width = document.getElementById("OverlayWidth").value + "px"
-
-  document.getElementById("OverlayHeight").value = 50
-  document.getElementById("overlay").style.height = document.getElementById("OverlayHeight").value + "px"
-  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight /0.75) + "px"
-  document.getElementById("OverlaySettings").style.marginTop = document.getElementById("overlay").offsetHeight + 10 + "px"
-
-  document.getElementById("TitleFontSize").value = 20
-  document.getElementById("title").style.fontSize = document.getElementById("TitleFontSize").value + "px"
-
-  document.getElementById("ChannelFontSize").value = 0
-  document.getElementById("channel").style.fontSize = document.getElementById("ChannelFontSize").value + "px"
-
-  document.documentElement.style.setProperty("--TitleScroll", document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth + "px")
-  document.documentElement.style.setProperty("--ChannelScroll", document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth + "px")
-
-  let timer1 = (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond
-  let timer2 = (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond
-
-  if (timer1 < 1) {
-    timer1 = 1
-  } else if (timer1 > 60) {
-    timer1 = 60
-  }
-
-  if (timer2 < 1) {
-    timer2 = 1
-  } else if (timer2 > 60) {
-    timer2 = 60
-  }
-
-  if (TitleScrollStatus == true) {
-    document.getElementById("title").style.animation = "TitleScroll " + timer1 + "s linear infinite"
-  }
-  if (ChannelScrollStatus == true) {
-    document.getElementById("channel").style.animation = "ChannelScroll " + timer2 + "s linear infinite"
-  }
-})
-
-document.getElementById("preset3").addEventListener("click", () => {
-  document.getElementById("OverlayWidth").value = 250
-  document.getElementById("overlay").style.width = document.getElementById("OverlayWidth").value + "px"
-
-  document.getElementById("OverlayHeight").value = 50
-  document.getElementById("overlay").style.height = document.getElementById("OverlayHeight").value + "px"
-  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight /0.75) + "px"
-  document.getElementById("OverlaySettings").style.marginTop = document.getElementById("overlay").offsetHeight + 10 + "px"
-
-  document.getElementById("TitleFontSize").value = 14
-  document.getElementById("title").style.fontSize = document.getElementById("TitleFontSize").value + "px"
-
-  document.getElementById("ChannelFontSize").value = 14
-  document.getElementById("channel").style.fontSize = document.getElementById("ChannelFontSize").value + "px"
-
-  document.documentElement.style.setProperty("--TitleScroll", document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth + "px")
-  document.documentElement.style.setProperty("--ChannelScroll", document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth + "px")
-
-  let timer1 = (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond
-  let timer2 = (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond
-
-  if (timer1 < 1) {
-    timer1 = 1
-  } else if (timer1 > 60) {
-    timer1 = 60
-  }
-
-  if (timer2 < 1) {
-    timer2 = 1
-  } else if (timer2 > 60) {
-    timer2 = 60
-  }
-
-  if (TitleScrollStatus == true) {
-    document.getElementById("title").style.animation = "TitleScroll " + timer1 + "s linear infinite"
-  }
-  if (ChannelScrollStatus == true) {
-    document.getElementById("channel").style.animation = "ChannelScroll " + timer2 + "s linear infinite"
-  }
-})
-
-
-
-function generateOverlay() {
-  document.getElementById("time").style.background = generateRGB()
-  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight /0.75) + "px"
-
-  try{
-    document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.snippet.thumbnails.default.url + '" alt="Video Thumbnail">'
-  } catch {
-    {}
-  }
-
-  document.getElementById("title").innerHTML = document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML
-  document.getElementById("channel").innerHTML = document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML
-
-  TimeUpdater = setInterval(() => {
-    try {
-      document.getElementById("time").style.width = player.getCurrentTime() / player.getDuration() * 100 + "%"
-    } catch {
-      document.getElementById("time").style.width = "0%"
-    }
-
-  }, 500);
-}
-
-/* CODE FOR OVERLAY */
-
-function generateRGB() {
-  let MyColor = [0,0,0]
-  MyColor[Math.floor(Math.random()*3)] = 255
-
-  let SecondIndex = Math.floor(Math.random()*4)
-
-  if (MyColor[SecondIndex] == 0){
-    MyColor[SecondIndex] = Math.floor(Math.random()*256)
-  } else {
-    MyColor[(SecondIndex + 1) % 2] = Math.floor(Math.random()*256)
-  }
-  return "rgb(" + MyColor[0] + "," + MyColor[1] + "," + MyColor[2] + ")"
 }
