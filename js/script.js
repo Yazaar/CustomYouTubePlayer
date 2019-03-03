@@ -295,7 +295,7 @@ document.getElementById("youtube").addEventListener("click", () => {
     } else {
       window.open("https://www.youtube.com/watch?v="+CurrentlyPlaying.id.videoId)
     }
-  } catch {
+  } catch(error) {
     {}
   }
 })
@@ -493,7 +493,7 @@ function updateOverlay() {
     
     try {
       document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.snippet.thumbnails.default.url + '" alt="Video Thumbnail">'
-    } catch {
+    } catch(error) {
       {}
     }
     
@@ -804,7 +804,7 @@ function generateOverlay() {
 
   try{
     document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.snippet.thumbnails.default.url + '" alt="Video Thumbnail">'
-  } catch {
+  } catch(error) {
     {}
   }
 
@@ -814,7 +814,7 @@ function generateOverlay() {
   TimeUpdater = setInterval(() => {
     try {
       document.getElementById("time").style.width = player.getCurrentTime() / player.getDuration() * 100 + "%"
-    } catch {
+    } catch(error) {
       document.getElementById("time").style.width = "0%"
     }
 
