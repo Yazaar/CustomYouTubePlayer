@@ -595,45 +595,50 @@ document.getElementById("OverlayHeight").addEventListener("input", () => {
   document.getElementById("OverlaySettings").style.marginTop = document.getElementById("overlay").offsetHeight + 10 + "px"
 })
 
-document.getElementById("BGCR").addEventListener("input", () => {
-  if (document.getElementById("BGCR").value == "") {
-    document.getElementById("BGCR").value = 0
-  }
-  if (document.getElementById("BGCG").value == "") {
-    document.getElementById("BGCG").value = 0
-  }
-  if (document.getElementById("BGCB").value == "") {
-    document.getElementById("BGCB").value = 0
-  }
-  document.getElementById("overlay").style.background = "rgb(" + document.getElementById("BGCR").value + "," + document.getElementById("BGCG").value + "," + document.getElementById("BGCB").value + ")"
-})
 
-document.getElementById("BGCG").addEventListener("input", () => {
-  if (document.getElementById("BGCR").value == "") {
-    document.getElementById("BGCR").value = 0
-  }
-  if (document.getElementById("BGCG").value == "") {
-    document.getElementById("BGCG").value = 0
-  }
-  if (document.getElementById("BGCB").value == "") {
-    document.getElementById("BGCB").value = 0
-  }
-  document.getElementById("overlay").style.background = "rgb(" + document.getElementById("BGCR").value + "," + document.getElementById("BGCG").value + "," + document.getElementById("BGCB").value + ")"
-})
-document.getElementById("BGCB").addEventListener("input", () => {
-  if (document.getElementById("BGCR").value == "") {
-    document.getElementById("BGCR").value = 0
-  }
-  if (document.getElementById("BGCG").value == "") {
-    document.getElementById("BGCG").value = 0
-  }
-  if (document.getElementById("BGCB").value == "") {
-    document.getElementById("BGCB").value = 0
-  }
-  document.getElementById("overlay").style.background = "rgb(" + document.getElementById("BGCR").value + "," + document.getElementById("BGCG").value + "," + document.getElementById("BGCB").value + ")"
-})
+document.getElementById("BGCR").addEventListener("input", backgroundColorChanged)
+document.getElementById("BGCG").addEventListener("input", backgroundColorChanged)
+document.getElementById("BGCB").addEventListener("input", backgroundColorChanged)
 
-document.getElementById("FTCR").addEventListener("input", () => {
+function backgroundColorChanged(){
+  if (document.getElementById("BGCR").value == "") {
+    document.getElementById("BGCR").value = 0
+  }
+  if (document.getElementById("BGCG").value == "") {
+    document.getElementById("BGCG").value = 0
+  }
+  if (document.getElementById("BGCB").value == "") {
+    document.getElementById("BGCB").value = 0
+  }
+
+  if (parseFloat(document.getElementById("BGCR").value) > 255) {
+    document.getElementById("BGCR").value = 255
+  }
+  if (parseFloat(document.getElementById("BGCG").value) > 255) {
+    document.getElementById("BGCG").value = 255
+  }
+  if (parseFloat(document.getElementById("BGCB").value) > 255) {
+    document.getElementById("BGCB").value = 255
+  }
+  if (parseFloat(document.getElementById("BGCR").value) < 0) {
+    document.getElementById("BGCR").value = 0
+  }
+  if (parseFloat(document.getElementById("BGCG").value) < 0) {
+    document.getElementById("BGCG").value = 0
+  }
+  if (parseFloat(document.getElementById("BGCB").value) < 0) {
+    document.getElementById("BGCB").value = 0
+  }
+
+  document.getElementById("overlay").style.background = "rgb(" + parseInt(document.getElementById("BGCR").value) + "," + parseInt(document.getElementById("BGCG").value) + "," + parseInt(document.getElementById("BGCB").value) + ")"
+}
+
+
+document.getElementById("FTCR").addEventListener("input", textColorChanged)
+document.getElementById("FTCG").addEventListener("input", textColorChanged)
+document.getElementById("FTCB").addEventListener("input", textColorChanged)
+
+function textColorChanged(){
   if (document.getElementById("FTCR").value == "") {
     document.getElementById("FTCR").value = 0
   }
@@ -643,35 +648,29 @@ document.getElementById("FTCR").addEventListener("input", () => {
   if (document.getElementById("FTCB").value == "") {
     document.getElementById("FTCB").value = 0
   }
-  document.getElementById("title").style.color = "rgb(" + document.getElementById("FTCR").value + "," + document.getElementById("FTCG").value + "," + document.getElementById("FTCB").value + ")"
-  document.getElementById("channel").style.color = "rgb(" + document.getElementById("FTCR").value + "," + document.getElementById("FTCG").value + "," + document.getElementById("FTCB").value + ")"
-})
-document.getElementById("FTCG").addEventListener("input", () => {
-  if (document.getElementById("FTCR").value == "") {
+
+  if (parseFloat(document.getElementById("FTCR").value) > 255) {
+    document.getElementById("FTCR").value = 255
+  }
+  if (parseFloat(document.getElementById("FTCG").value) > 255) {
+    document.getElementById("FTCG").value = 255
+  }
+  if (parseFloat(document.getElementById("FTCB").value) > 255) {
+    document.getElementById("FTCB").value = 255
+  }
+  if (parseFloat(document.getElementById("FTCR").value) < 0) {
     document.getElementById("FTCR").value = 0
   }
-  if (document.getElementById("FTCG").value == "") {
+  if (parseFloat(document.getElementById("FTCG").value) < 0) {
     document.getElementById("FTCG").value = 0
   }
-  if (document.getElementById("FTCB").value == "") {
+  if (parseFloat(document.getElementById("FTCB").value) < 0) {
     document.getElementById("FTCB").value = 0
   }
-  document.getElementById("title").style.color = "rgb(" + document.getElementById("FTCR").value + "," + document.getElementById("FTCG").value + "," + document.getElementById("FTCB").value + ")"
-  document.getElementById("channel").style.color = "rgb(" + document.getElementById("FTCR").value + "," + document.getElementById("FTCG").value + "," + document.getElementById("FTCB").value + ")"
-})
-document.getElementById("FTCB").addEventListener("input", () => {
-  if (document.getElementById("FTCR").value == "") {
-    document.getElementById("FTCR").value = 0
-  }
-  if (document.getElementById("FTCG").value == "") {
-    document.getElementById("FTCG").value = 0
-  }
-  if (document.getElementById("FTCB").value == "") {
-    document.getElementById("FTCB").value = 0
-  }
-  document.getElementById("title").style.color = "rgb(" + document.getElementById("FTCR").value + "," + document.getElementById("FTCG").value + "," + document.getElementById("FTCB").value + ")"
-  document.getElementById("channel").style.color = "rgb(" + document.getElementById("FTCR").value + "," + document.getElementById("FTCG").value + "," + document.getElementById("FTCB").value + ")"
-})
+
+  document.getElementById("title").style.color = "rgb(" + parseInt(document.getElementById("FTCR").value) + "," + parseInt(document.getElementById("FTCG").value) + "," + parseInt(document.getElementById("FTCB").value) + ")"
+  document.getElementById("channel").style.color = "rgb(" + parseInt(document.getElementById("FTCR").value) + "," + parseInt(document.getElementById("FTCG").value) + "," + parseInt(document.getElementById("FTCB").value) + ")"
+}
 
 
 document.getElementById("preset1").addEventListener("click", () => {
