@@ -10,3 +10,7 @@
 <p>Requirements for playlist url:<br>1: contain "youtube.com/playlist?"<br>2: contain "list=[list-id]"</p>
 <br><br>
 <p>Click on a song in the queue to remove it, and click on the "REMOVE" button to change mode</p>
+<br>
+<h1>Now including overlay for OBS ++</h1>
+<p>How to enable: Click "Toggle Overlay"</p>
+<p>The overlay will pop up, it will follow wherever you scroll, customize it to your liking or use a preset (3 available) and capture it thru a window capture.</p>
