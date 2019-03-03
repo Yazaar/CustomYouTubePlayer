@@ -226,6 +226,7 @@ body {
     white-space: nowrap;
     margin-top: 10px;
     font-size: 14px;
+    color: #b6b6b6;
 }
 
 #channel {
@@ -233,6 +234,7 @@ body {
     white-space: nowrap;
     margin-bottom: 10px;
     font-size: 14px;
+    color: #b6b6b6;
 }
 
 #right {
