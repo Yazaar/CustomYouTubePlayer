@@ -1,4 +1,5 @@
 # Custom YouTube Player | By: Yazaar
+<p>Feel free to message me on <a href="https://www.twitch.tv/yazaar">twitch</a> or discord (Yazaar#1779)</p>
 <h1>Link to website:</h1>
 <h1>https://yazaar.github.io/CustomYouTubePlayer/</h1>
 <p>Thanks for checking my player out!<br>//Yazaar</p>
@@ -14,3 +15,4 @@
 <h1>Now including overlay for OBS ++</h1>
 <p>How to enable: Click "Toggle Overlay"</p>
 <p>The overlay will pop up, it will follow wherever you scroll, customize it to your liking or use a preset (3 available) and capture it thru a window capture.</p>
+<h1>I may create a song request system, still not sure</h1>
