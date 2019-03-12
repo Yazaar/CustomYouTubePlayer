@@ -16,3 +16,5 @@
 <p>How to enable: Click "Toggle Overlay"</p>
 <p>The overlay will pop up, it will follow wherever you scroll, customize it to your liking or use a preset (3 available) and capture it thru a window capture.</p>
 <h1>I may create a song request system, still not sure</h1>
+<p>Update for songrequest system:<br>I am now able to confirm that it is 100% possible without the twitch API which removes limit complications</p>
+<p>But I have no time to create it right now</p>
