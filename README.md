@@ -15,3 +15,5 @@
 <h1>Now including overlay for OBS ++</h1>
 <p>How to enable: Click "Toggle Overlay"</p>
 <p>The overlay will pop up, it will follow wherever you scroll, customize it to your liking or use a preset (3 available) and capture it thru a window capture.</p>
+<h1>Known "bugs":</h1>
+<p>Shows the owner of the playlist and not the video as channel</p>
