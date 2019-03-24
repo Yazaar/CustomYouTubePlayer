@@ -346,11 +346,6 @@ document.getElementById("queue").addEventListener("click", (e) => {
     let TargetIndex = QueueItems.indexOf(e.target)
     let innerHTML = document.getElementById("QueueClick").innerHTML.toLowerCase()
 
-    CurrentlyPlaying = queue[TargetIndex]
-    document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
-    document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
-    updateOverlay()
-
     if (innerHTML == "remove") {
       queue.splice(TargetIndex ,1)
 
@@ -362,6 +357,11 @@ document.getElementById("queue").addEventListener("click", (e) => {
       document.getElementById("queue").innerHTML = CodeBlock
 
     } else if (innerHTML == "play now") {
+
+      CurrentlyPlaying = queue[TargetIndex]
+      document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
+      document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
+      updateOverlay()
 
       if (queue[TargetIndex].kind == "youtube#playlistItem"){
         player.loadVideoById(queue[TargetIndex].snippet.resourceId.videoId)
