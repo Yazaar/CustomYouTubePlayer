@@ -1,5 +1,5 @@
 # Custom YouTube Player | By: Yazaar
-<p>Feel free to message me on <a href="https://www.twitch.tv/yazaar">twitch</a> or discord (Yazaar#1779)</p>
+<p>Issues? Feel free to message me on <a href="https://www.twitch.tv/yazaar">twitch</a> or discord (Yazaar#1779)</p>
 <h1>Link to website:</h1>
 <h1>https://yazaar.github.io/CustomYouTubePlayer/</h1>
 <p>Thanks for checking my player out!<br>//Yazaar</p>
