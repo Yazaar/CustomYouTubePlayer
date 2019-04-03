@@ -1,5 +1,4 @@
-// 2. This code loads the IFrame Player API code asynchronously.
-
+// Main variables
 let xml
 let loading = false
 let data
@@ -14,13 +13,17 @@ let CurrentlyPlaying
 let SearchMethod
 let CurrentSearchMethod
 let listId
+let token
+let morePages
+// Main variables
 
-// Overlay
+// Overlay variables
 let OverlayToggle = false
 let TimeUpdater
 let TitleScrollStatus = false
 let ChannelScrollStatus = false
-let PixelsPerSecond = 10
+let tickerSpeed = 10
+// Overlay variables
 
 var tag = document.createElement('script');
 
@@ -28,9 +31,8 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-// 3. This function creates an <iframe> (and YouTube player)
-//    after the API code downloads.
 var player;
+
 function StartYouTubeIframe(video_id) {
   start = false
   player = new YT.Player('player', {
@@ -45,8 +47,7 @@ function StartYouTubeIframe(video_id) {
 }
 
 function onYouTubeIframeAPIReady() {
-  //document.getElementById("player").innerHTML = '<iframe frameborder="0" id="player" src="ready.html"></iframe>'
-  document.getElementById("player").innerHTML = '<div style="background:#000000;color:#ffffff;width:100%;height:90%;display:flex;justify-content:center;align-items:center;text-align:center;"><h1>YouTube<br>READY FOR USE</h1></div>'
+  document.getElementById("player").innerHTML = '<div style="background:#000000;color:#ffffff;width:100%;height:90%;display:flex;justify-content:center;align-items:center;text-align:center;overflow:hidden;"><h1>YouTube<br>READY FOR USE</h1></div>'
 }
 
 // 4. The API will call this function when the video player is ready.
@@ -56,7 +57,7 @@ function onPlayerReady(event) {
 
 
 function onPlayerStateChange(event) {
-  // YT.PlayerState.***** {"UNSTARTED":-1,"ENDED":0,"PLAYING":1,"PAUSED":2,"BUFFERING":3,"CUED":5}
+  // YT.PlayerState. {"UNSTARTED":-1,"ENDED":0,"PLAYING":1,"PAUSED":2,"BUFFERING":3,"CUED":5}
   PlayerState = event.data
   if (event.data == YT.PlayerState.ENDED) {
     if (queue.length > 0) {
@@ -66,18 +67,19 @@ function onPlayerStateChange(event) {
       } else {
         index = 0
       }
-      if (queue[index].kind == "youtube#playlistItem"){
-        player.loadVideoById(queue[index].snippet.resourceId.videoId)
-      } else {
-        player.loadVideoById(queue[index].id.videoId)
-      }
+      
+      player.loadVideoById(queue[index].id)
 
       CurrentlyPlaying = queue[index]
-      document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = queue[index].snippet.title
-      document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = queue[index].snippet.channelTitle
+      document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = queue[index].title
+      document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = queue[index].channel
+      document.getElementById("Currently-Playing-Views").innerHTML = queue[index].views
+      document.getElementById("Currently-Playing-Likes").innerHTML = queue[index].likes
+      document.getElementById("Currently-Playing-Dislikes").innerHTML = queue[index].dislikes
+
       updateOverlay()
 
-      if (LockStatus == true){
+      if (LockStatus == true) {
         queue.push(queue[index])
         queue.splice(index, 1)
       } else {
@@ -85,152 +87,192 @@ function onPlayerStateChange(event) {
       }
 
       let InnerHTMLData = "<h1>Queue:</h1>"
-      for (i in queue){
-        InnerHTMLData += "<section><p>" + queue[i].snippet.title + "</p></section>"
+      for (let i in queue) {
+        InnerHTMLData += "<section><p>" + queue[i].title + "</p></section>"
       }
       document.getElementById("queue").innerHTML = InnerHTMLData
     }
   }
 }
 
-/*
-  Event listerners start
-*/
 
-document.getElementById("Search").addEventListener("click", () => {
-  RunSearch()
-})
+//  Event listerners start
 
-function RunSearch(){
+
+document.getElementById("Search").addEventListener("click", RunSearch)
+
+function RunSearch() {
+  if (loading == true) {
+    return
+  }
+  loading = true
+  morePages = true
+
   SearchInput = document.getElementById("SearchInput").value
   if (SearchInput != "" && SearchMethod == "video") {
     xml = new XMLHttpRequest()
+    // API Call 1 (List videos)
     xml.onreadystatechange = function () {
-        if (xml.readyState == 4) {
-            video_data = {}
-            data = JSON.parse(xml.response).items
+      if (xml.readyState == 4) {
+        video_data = {}
+        data = JSON.parse(xml.response).items
+        token = JSON.parse(xml.response).nextPageToken
 
-            let InnerHTMLData = ""
+        let ids = ""
 
-            for (i in data) {
-              InnerHTMLData += '<section onclick="GetVideoID(this)" data-videoid="' + data[i].id.videoId + '">' + '<img src="' + data[i].snippet.thumbnails.default.url + '">' + "<span>" + "<h1>" + data[i].snippet.title + "</h1>" + "<p>" + data[i].snippet.channelTitle + "</p>" + "</span>" + "</section>"
-              video_data[data[i].id.videoId] = data[i]
-            }
-            document.getElementById("SearchResults").innerHTML = InnerHTMLData
+        for (let i in data) {
+          if (ids === "") {
+            ids += data[i].id.videoId
+          } else {
+            ids += "," + data[i].id.videoId
+          }
         }
+
+        xml = new XMLHttpRequest()
+        // API Call 2 (Video data from id:s)
+        xml.onreadystatechange = newRequestFromIDs
+        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40", true)
+        xml.send()
+      }
     }
 
     CurrentSearchMethod = "video"
-    xml.open('get', 'https://www.googleapis.com/youtube/v3/search?part=snippet&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40&type=video&order=relevance&maxResults=25&q='+encodeURI(SearchInput), true)
+    xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40&type=video&order=relevance&maxResults=25&q=" + encodeURI(SearchInput), true)
     xml.send()
+
   } else if (SearchInput != "" && SearchMethod == "playlist") {
-    MorePages = true
     xml = new XMLHttpRequest()
+    // API call 1 (List videos)
     xml.onreadystatechange = function () {
-        if (xml.readyState == 4) {
-            video_data = {}
-            data = JSON.parse(xml.response).items
-
-            let InnerHTMLData = ""
-
-            for (i in data) {
-              if(data[i].snippet.title == "Private video") {
-                data[i].snippet.thumbnails = {}
-                data[i].snippet.thumbnails.default = {}
-                data[i].snippet.thumbnails.default.url = "img/no_thumbnail.jpg"
-              }
-              InnerHTMLData += '<section onclick="GetVideoID(this)" data-videoid="' + data[i].snippet.resourceId.videoId + '">' + '<img src="' + data[i].snippet.thumbnails.default.url + '">' + "<span>" + "<h1>" + data[i].snippet.title + "</h1>" + "<p>" + data[i].snippet.channelTitle + "</p>" + "</span>" + "</section>"
-              video_data[data[i].snippet.resourceId.videoId] = data[i]
-            }
-            document.getElementById("SearchResults").innerHTML = InnerHTMLData
+      if (xml.readyState == 4) {
+        video_data = {}
+        data = JSON.parse(xml.response).items
+        if (!JSON.parse(xml.response).nextPageToken) {
+          morePages = false
+        } else {
+          token = JSON.parse(xml.response).nextPageToken
+          morePages = true
         }
+
+        let ids = ""
+
+        for (i of data) {
+          if (ids === "") {
+            ids += i.snippet.resourceId.videoId
+          } else {
+            ids += "," + i.snippet.resourceId.videoId
+          }
+        }
+
+        xml = new XMLHttpRequest()
+        // API call 2 (Video data from id:s)
+        xml.onreadystatechange = newRequestFromIDs
+
+        CurrentSearchMethod = "playlist"
+        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40", true)
+        xml.send()
+      }
     }
     listId = new URLSearchParams(SearchInput.split("?")[1])
 
-    CurrentSearchMethod = "playlist"
-    xml.open('get', 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40&maxResults=25&playlistId='+ listId.get("list"), true)
+    xml.open('get', 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40&maxResults=25&playlistId=' + listId.get("list"), true)
     xml.send()
   }
 }
 
 
 window.addEventListener("keypress", (e) => {
-  if (e.path[0] == document.getElementById("SearchInput") && e.key == "Enter"){
+  if (e.path[0] == document.getElementById("SearchInput") && e.key == "Enter") {
     RunSearch()
   }
 })
 
+
 window.addEventListener("scroll", () => {
+  if (loading == true) {
+    return
+  }
   if (document.getElementById("SearchResults").innerHTML == "") {
     return
   }
+  if (window.pageYOffset + window.innerHeight * 2 < document.querySelector("html").offsetHeight) {
+    return
+  }
+  if (morePages == false){
+    return
+  }
 
-  if (window.pageYOffset + window.innerHeight*2 > document.querySelector("html").offsetHeight && CurrentSearchMethod == "video") {
-    if (loading == false) {
-      loading = true
-      token = JSON.parse(xml.response).nextPageToken
+  loading = true
 
-      xml = new XMLHttpRequest()
-
-      xml.onreadystatechange = function () {
-        if (xml.readyState == 4) {
-            data = JSON.parse(xml.response).items
-
-            let InnerHTMLData = document.getElementById("SearchResults").innerHTML
-
-            for (i in data) {
-              InnerHTMLData += '<section onclick="GetVideoID(this)" data-videoid="' + data[i].id.videoId + '">' + '<img src="' + data[i].snippet.thumbnails.default.url + '">' + "<span>" + "<h1>" + data[i].snippet.title + "</h1>" + "<p>" + data[i].snippet.channelTitle + "</p>" + "</span>" + "</section>"
-              video_data[data[i].id.videoId] = data[i]
-            }
-            document.getElementById("SearchResults").innerHTML = InnerHTMLData
-            loading = false
+  if (SearchMethod == "playlist") {
+    xml = new XMLHttpRequest()
+    // API Call 1 (List videos)
+    xml.onreadystatechange = function () {
+      if (xml.readyState == 4) {
+        data = JSON.parse(xml.response).items
+        if (JSON.parse(xml.response).nextPageToken === undefined) {
+          morePages = false
+        } else {
+          token = JSON.parse(xml.response).nextPageToken
         }
+
+        let ids = ""
+
+        for (i of data) {
+          if (ids === "") {
+            ids += i.snippet.resourceId.videoId
+          } else {
+            ids += "," + i.snippet.resourceId.videoId
+          }
+        }
+
+        xml = new XMLHttpRequest()
+        // API Call 2 (Video data from id:s)
+        xml.onreadystatechange = requestFromIDs
+        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40", true)
+        xml.send()
+      }
     }
-    xml.open('get', 'https://www.googleapis.com/youtube/v3/search?part=snippet&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40&type=video&order=relevance&pageToken=' + token + '&maxResults=25&q='+encodeURI(SearchInput), true)
+
+    xml.open("get", "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40&maxResults=25&playlistId=" + listId.get("list") + "&pageToken=" + token, true)
     xml.send()
 
-    }
-  } else if (window.pageYOffset + window.innerHeight*2 > document.querySelector("html").offsetHeight && CurrentSearchMethod == "playlist") {
 
-      if (loading == false && MorePages == true) {
-
-        loading = true
-        
-        if (! JSON.parse(xml.response).nextPageToken) {
-          MorePages = false
-          loading = false
-          return
+  } else if (SearchMethod == "video") {
+    xml = new XMLHttpRequest()
+    // API Call 1 (List videos)
+    xml.onreadystatechange = function () {
+      if (xml.readyState == 4) {
+        data = JSON.parse(xml.response).items
+        if (JSON.parse(xml.response).nextPageToken === undefined) {
+          morePages = false
+        } else {
+          token = JSON.parse(xml.response).nextPageToken
         }
 
-        token = JSON.parse(xml.response).nextPageToken
-        
-        xml = new XMLHttpRequest()
+        let ids = ""
 
-        xml.onreadystatechange = function () {
-          if (xml.readyState == 4) {
-
-              data = JSON.parse(xml.response).items
-
-              let InnerHTMLData = document.getElementById("SearchResults").innerHTML
-
-              for (i in data) {
-                if(data[i].snippet.title == "Private video") {
-                  data[i].snippet.thumbnails = {}
-                  data[i].snippet.thumbnails.default = {}
-                  data[i].snippet.thumbnails.default.url = "img/no_thumbnail.jpg"
-                }
-                InnerHTMLData += '<section onclick="GetVideoID(this)" data-videoid="' + data[i].snippet.resourceId.videoId + '">' + '<img src="' + data[i].snippet.thumbnails.default.url + '">' + "<span>" + "<h1>" + data[i].snippet.title + "</h1>" + "<p>" + data[i].snippet.channelTitle + "</p>" + "</span>" + "</section>"
-                video_data[data[i].snippet.resourceId.videoId] = data[i]
-              }
-              document.getElementById("SearchResults").innerHTML = InnerHTMLData
-              loading = false
+        for (let video of data) {
+          if (ids === "") {
+            ids += video.id.videoId
+          } else {
+            ids += "," + video.id.videoId
           }
+        }
+
+        xml = new XMLHttpRequest()
+        // API Call 2 (Video data from id:s)
+        xml.onreadystatechange = requestFromIDs
+        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40", true)
+        xml.send()
       }
-      xml.open('get', 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,id&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40&maxResults=25&pageToken=' + token + '&playlistId='+ listId.get("list"), true)
-      xml.send()
     }
+    xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40&type=video&order=relevance&maxResults=25&q=" + encodeURI(SearchInput) + "&pageToken=" + token, true)
+    xml.send()
   }
+
 })
+
 
 document.getElementById("skip").addEventListener("click", () => {
   if (queue.length > 0) {
@@ -241,19 +283,18 @@ document.getElementById("skip").addEventListener("click", () => {
       index = 0
     }
 
-    
-    if (queue[index].kind == "youtube#playlistItem"){
-      player.loadVideoById(queue[index].snippet.resourceId.videoId)
-    } else {
-      player.loadVideoById(queue[index].id.videoId)
-    }
+
+    player.loadVideoById(queue[index].id)
 
     CurrentlyPlaying = queue[index]
-    document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = queue[index].snippet.title
-    document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = queue[index].snippet.channelTitle
+    document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = queue[index].title
+    document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = queue[index].channel
+    document.getElementById("Currently-Playing-Views").innerHTML = queue[index].views
+    document.getElementById("Currently-Playing-Likes").innerHTML = queue[index].likes
+    document.getElementById("Currently-Playing-Dislikes").innerHTML = queue[index].dislikes
     updateOverlay()
 
-    if (LockStatus == true){
+    if (LockStatus == true) {
       queue.push(queue[index])
       queue.splice(index, 1)
     } else {
@@ -261,8 +302,8 @@ document.getElementById("skip").addEventListener("click", () => {
     }
 
     let InnerHTMLData = "<h1>Queue:</h1>"
-    for (i in queue){
-      InnerHTMLData += "<section><p>" + queue[i].snippet.title + "</p></section>"
+    for (let i in queue) {
+      InnerHTMLData += "<section><p>" + queue[i].title + "</p></section>"
     }
     document.getElementById("queue").innerHTML = InnerHTMLData
   }
@@ -289,13 +330,9 @@ document.getElementById("shuffle").addEventListener("click", () => {
 })
 
 document.getElementById("youtube").addEventListener("click", () => {
-  try{
-    if (CurrentlyPlaying.kind == "youtube#playlistItem"){
-      window.open("https://www.youtube.com/watch?v="+CurrentlyPlaying.snippet.resourceId.videoId)
-    } else {
-      window.open("https://www.youtube.com/watch?v="+CurrentlyPlaying.id.videoId)
-    }
-  } catch(error) {
+  try {
+    window.open("https://www.youtube.com/watch?v=" + CurrentlyPlaying.id)
+  } catch (error) {
     {}
   }
 })
@@ -314,7 +351,7 @@ document.getElementById("QueueClick").addEventListener("click", () => {
 })
 
 
-for (let i = 0; i < 5; i++) { 
+for (let i = 0; i < 5; i++) {
   document.getElementById("PlayerSettings").querySelectorAll("span")[i].addEventListener("mouseover", (e) => {
 
     if (e.target.id == "shuffle") {
@@ -331,14 +368,14 @@ for (let i = 0; i < 5; i++) {
   })
 }
 
-for (let i = 0; i < document.getElementById("PlayerSettings").querySelectorAll("span").length; i++) { 
+for (let i = 0; i < document.getElementById("PlayerSettings").querySelectorAll("span").length; i++) {
   document.getElementById("PlayerSettings").querySelectorAll("span")[i].addEventListener("mouseleave", (e) => {
-  document.getElementById("StatusMessage").innerHTML = "Yazaar | YouTube Player"
+    document.getElementById("StatusMessage").innerHTML = "Yazaar | YouTube Player"
   })
 }
 
 document.getElementById("queue").addEventListener("click", (e) => {
-  if(e.target.nodeName == "P") {
+  if (e.target.nodeName == "P") {
     let QueueItems = []
     document.getElementById("queue").querySelectorAll("p").forEach((element) => {
       QueueItems.push(element)
@@ -347,29 +384,28 @@ document.getElementById("queue").addEventListener("click", (e) => {
     let innerHTML = document.getElementById("QueueClick").innerHTML.toLowerCase()
 
     if (innerHTML == "remove") {
-      queue.splice(TargetIndex ,1)
+      queue.splice(TargetIndex, 1)
 
       let CodeBlock = "<h1>Queue:</h1>"
 
-      for (i in queue) {
-        CodeBlock += "<section><p>" + queue[i].snippet.title + "</p></section>"
+      for (let i of queue) {
+        CodeBlock += "<section><p>" + i.title + "</p></section>"
       }
       document.getElementById("queue").innerHTML = CodeBlock
 
     } else if (innerHTML == "play now") {
 
       CurrentlyPlaying = queue[TargetIndex]
-      document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
-      document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
+      document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.title
+      document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.channel
+      document.getElementById("Currently-Playing-Views").innerHTML = CurrentlyPlaying.views
+      document.getElementById("Currently-Playing-Likes").innerHTML = CurrentlyPlaying.likes
+      document.getElementById("Currently-Playing-Dislikes").innerHTML = CurrentlyPlaying.dislikes
       updateOverlay()
 
-      if (queue[TargetIndex].kind == "youtube#playlistItem"){
-        player.loadVideoById(queue[TargetIndex].snippet.resourceId.videoId)
-      } else {
-        player.loadVideoById(queue[TargetIndex].id.videoId)
-      }
+      player.loadVideoById(queue[TargetIndex].id)
 
-      if (LockStatus == true){
+      if (LockStatus == true) {
         queue.push(queue[TargetIndex])
         queue.splice(TargetIndex, 1)
       } else {
@@ -378,8 +414,8 @@ document.getElementById("queue").addEventListener("click", (e) => {
 
       let CodeBlock = "<h1>Queue:</h1>"
 
-      for (i in queue) {
-        CodeBlock += "<section><p>" + queue[i].snippet.title + "</p></section>"
+      for (let i of queue) {
+        CodeBlock += "<section><p>" + i.title + "</p></section>"
       }
       document.getElementById("queue").innerHTML = CodeBlock
 
@@ -391,44 +427,43 @@ document.getElementById("queue").addEventListener("click", (e) => {
         queue.push(queue[0])
         queue.splice(0, 1)
       } else {
-        queue[TargetIndex] = queue[TargetIndex-1]
-        queue[TargetIndex-1] = temp
+        queue[TargetIndex] = queue[TargetIndex - 1]
+        queue[TargetIndex - 1] = temp
       }
 
       let CodeBlock = "<h1>Queue:</h1>"
 
-      for (i in queue) {
-        CodeBlock += "<section><p>" + queue[i].snippet.title + "</p></section>"
+      for (let i of queue) {
+        CodeBlock += "<section><p>" + i.title + "</p></section>"
       }
       document.getElementById("queue").innerHTML = CodeBlock
-      
+
     } else if (innerHTML == "move down") {
 
       let temp = queue[TargetIndex]
 
-      if (TargetIndex == queue.length-1) {
-        queue.unshift(queue[queue.length-1])
-        queue.splice(queue.length-1, 1)
+      if (TargetIndex == queue.length - 1) {
+        queue.unshift(queue[queue.length - 1])
+        queue.splice(queue.length - 1, 1)
       } else {
-        queue[TargetIndex] = queue[TargetIndex+1]
-        queue[TargetIndex+1] = temp
+        queue[TargetIndex] = queue[TargetIndex + 1]
+        queue[TargetIndex + 1] = temp
       }
 
 
       let CodeBlock = "<h1>Queue:</h1>"
 
-      for (i in queue) {
-        CodeBlock += "<section><p>" + queue[i].snippet.title + "</p></section>"
+      for (let i of queue) {
+        CodeBlock += "<section><p>" + i.title + "</p></section>"
       }
       document.getElementById("queue").innerHTML = CodeBlock
-
     }
 
   }
 })
 
 document.getElementById("SearchInput").addEventListener("input", (e) => {
-  if(e.target.value.toLowerCase().includes("youtube.com/playlist") && e.target.value.toLowerCase().includes("?") && e.target.value.toLowerCase().includes("list=")) {
+  if (e.target.value.toLowerCase().includes("youtube.com/playlist") && e.target.value.toLowerCase().includes("?") && e.target.value.toLowerCase().includes("list=")) {
     document.getElementById("Search").querySelector("p").innerHTML = "Search Playlist"
     SearchMethod = "playlist"
   } else {
@@ -437,79 +472,69 @@ document.getElementById("SearchInput").addEventListener("input", (e) => {
   }
 })
 
-/*
-   Event listnerers end
-*/
+//   Event listnerers end
 
-function GetVideoID(data_tag){
+
+function AddVideo(data_tag) {
   video_id = new String(data_tag.getAttribute("data-videoid"))
-  if (video_data[video_id].kind == "youtube#playlistItem"){
-    
-    if (document.getElementById("player").nodeName == "DIV") {
-      CurrentlyPlaying = video_data[video_id]
-      document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
-      document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
-      StartYouTubeIframe(video_id)
-      updateOverlay()
-    } else {
-      if (PlayerState == 0){
-        player.loadVideoById(video_id)
-        CurrentlyPlaying = video_data[video_id]
-        document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
-        document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
-        updateOverlay()
-      } else {
-        queue.push(video_data[video_id])
-        document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length-1].snippet.title + "</p></section>"
-      }
-    }
-    return
-  }
 
   if (document.getElementById("player").nodeName == "DIV") {
+    if (LockStatus == true) {
+      queue.push(video_data[video_id])
+      document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length - 1].title + "</p></section>"
+    }
     CurrentlyPlaying = video_data[video_id]
-    document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
-    document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
+    document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.title
+    document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.channel
+    document.getElementById("Currently-Playing-Views").innerHTML = CurrentlyPlaying.views
+    document.getElementById("Currently-Playing-Likes").innerHTML = CurrentlyPlaying.likes
+    document.getElementById("Currently-Playing-Dislikes").innerHTML = CurrentlyPlaying.dislikes
     StartYouTubeIframe(video_id)
     updateOverlay()
   } else {
-    if (PlayerState == 0){
+    if (PlayerState == 0) {
+      if (LockStatus == true) {
+        queue.push(video_data[video_id])
+        document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length - 1].title + "</p></section>"
+      }
       player.loadVideoById(video_id)
       CurrentlyPlaying = video_data[video_id]
-      document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.snippet.title
-      document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.snippet.channelTitle
+      document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.title
+      document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.channel
+      document.getElementById("Currently-Playing-Views").innerHTML = CurrentlyPlaying.views
+      document.getElementById("Currently-Playing-Likes").innerHTML = CurrentlyPlaying.likes
+      document.getElementById("Currently-Playing-Dislikes").innerHTML = CurrentlyPlaying.dislikes
       updateOverlay()
     } else {
       queue.push(video_data[video_id])
-      document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length-1].snippet.title + "</p></section>"
+      document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length - 1].title + "</p></section>"
     }
   }
 }
 
-/* CODE FOR OVERLAY */
+// CODE FOR OVERLAY START
 
 function updateOverlay() {
-  if (OverlayToggle == true){
-    
+  if (OverlayToggle == true) {
+
     try {
-      document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.snippet.thumbnails.default.url + '" alt="Video Thumbnail">'
-    } catch(error) {
+      document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.thumbnail + '" alt="Video Thumbnail">'
+    } catch (error) {
       {}
     }
-    
+
     document.getElementById("title").innerHTML = document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML
     document.getElementById("channel").innerHTML = document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML
-    
+
     document.getElementById("time").style.background = generateRGB()
-    
+
     document.documentElement.style.setProperty("--TitleScroll", document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth + "px")
     document.documentElement.style.setProperty("--ChannelScroll", document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth + "px")
-    
+
     if (document.getElementById("title").offsetWidth > document.getElementById("right").offsetWidth) {
       if (TitleScrollStatus != true) {
         TitleScrollStatus = true
-        document.getElementById("title").style.animation = "TitleScroll " + (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond + "s linear infinite"
-        
+        document.getElementById("title").style.animation = "TitleScroll " + (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed + "s linear infinite"
       }
     } else {
       if (TitleScrollStatus != false) {
@@ -521,7 +546,7 @@ function updateOverlay() {
     if (document.getElementById("channel").offsetWidth > document.getElementById("right").offsetWidth) {
       if (ChannelScrollStatus != true) {
         ChannelScrollStatus = true
-        document.getElementById("channel").style.animation = "ChannelScroll " + (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond + "s linear infinite"
+        document.getElementById("channel").style.animation = "ChannelScroll " + (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed + "s linear infinite"
       }
     } else {
       if (ChannelScrollStatus != false) {
@@ -533,7 +558,7 @@ function updateOverlay() {
 }
 
 document.getElementById("ToggleOverlay").addEventListener("click", () => {
-  
+
   if (OverlayToggle == true) {
     document.getElementById("OverlaySettings").style.height = "2rem"
     document.getElementById("OverlaySettings").style.marginTop = "0px"
@@ -574,12 +599,12 @@ document.getElementById("ChannelFontSize").addEventListener("input", () => {
 })
 
 document.getElementById("TickerSpeed").addEventListener("input", () => {
-  PixelsPerSecond = document.getElementById("TickerSpeed").value
+  tickerSpeed = document.getElementById("TickerSpeed").value
   if (TitleScrollStatus == true) {
-    document.getElementById("title").style.animation = "TitleScroll " + (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond + "s linear infinite"
+    document.getElementById("title").style.animation = "TitleScroll " + (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed + "s linear infinite"
   }
   if (ChannelScrollStatus == true) {
-    document.getElementById("channel").style.animation = "ChannelScroll " + (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond + "s linear infinite"
+    document.getElementById("channel").style.animation = "ChannelScroll " + (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed + "s linear infinite"
   }
 })
 
@@ -591,7 +616,7 @@ document.getElementById("OverlayWidth").addEventListener("input", () => {
 
 document.getElementById("OverlayHeight").addEventListener("input", () => {
   document.getElementById("overlay").style.height = document.getElementById("OverlayHeight").value + "px"
-  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight /0.75) + "px"
+  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight / 0.75) + "px"
   document.getElementById("OverlaySettings").style.marginTop = document.getElementById("overlay").offsetHeight + 10 + "px"
 })
 
@@ -600,7 +625,7 @@ document.getElementById("BGCR").addEventListener("input", backgroundColorChanged
 document.getElementById("BGCG").addEventListener("input", backgroundColorChanged)
 document.getElementById("BGCB").addEventListener("input", backgroundColorChanged)
 
-function backgroundColorChanged(){
+function backgroundColorChanged() {
   if (document.getElementById("BGCR").value == "") {
     document.getElementById("BGCR").value = 0
   }
@@ -638,7 +663,7 @@ document.getElementById("FTCR").addEventListener("input", textColorChanged)
 document.getElementById("FTCG").addEventListener("input", textColorChanged)
 document.getElementById("FTCB").addEventListener("input", textColorChanged)
 
-function textColorChanged(){
+function textColorChanged() {
   if (document.getElementById("FTCR").value == "") {
     document.getElementById("FTCR").value = 0
   }
@@ -679,7 +704,7 @@ document.getElementById("preset1").addEventListener("click", () => {
 
   document.getElementById("OverlayHeight").value = 75
   document.getElementById("overlay").style.height = document.getElementById("OverlayHeight").value + "px"
-  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight /0.75) + "px"
+  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight / 0.75) + "px"
   document.getElementById("OverlaySettings").style.marginTop = document.getElementById("overlay").offsetHeight + 10 + "px"
 
   document.getElementById("TitleFontSize").value = 25
@@ -691,8 +716,8 @@ document.getElementById("preset1").addEventListener("click", () => {
   document.documentElement.style.setProperty("--TitleScroll", document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth + "px")
   document.documentElement.style.setProperty("--ChannelScroll", document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth + "px")
 
-  let timer1 = (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond
-  let timer2 = (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond
+  let timer1 = (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
+  let timer2 = (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
 
   if (timer1 < 1) {
     timer1 = 1
@@ -720,7 +745,7 @@ document.getElementById("preset2").addEventListener("click", () => {
 
   document.getElementById("OverlayHeight").value = 50
   document.getElementById("overlay").style.height = document.getElementById("OverlayHeight").value + "px"
-  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight /0.75) + "px"
+  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight / 0.75) + "px"
   document.getElementById("OverlaySettings").style.marginTop = document.getElementById("overlay").offsetHeight + 10 + "px"
 
   document.getElementById("TitleFontSize").value = 20
@@ -732,8 +757,8 @@ document.getElementById("preset2").addEventListener("click", () => {
   document.documentElement.style.setProperty("--TitleScroll", document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth + "px")
   document.documentElement.style.setProperty("--ChannelScroll", document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth + "px")
 
-  let timer1 = (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond
-  let timer2 = (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond
+  let timer1 = (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
+  let timer2 = (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
 
   if (timer1 < 1) {
     timer1 = 1
@@ -761,7 +786,7 @@ document.getElementById("preset3").addEventListener("click", () => {
 
   document.getElementById("OverlayHeight").value = 50
   document.getElementById("overlay").style.height = document.getElementById("OverlayHeight").value + "px"
-  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight /0.75) + "px"
+  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight / 0.75) + "px"
   document.getElementById("OverlaySettings").style.marginTop = document.getElementById("overlay").offsetHeight + 10 + "px"
 
   document.getElementById("TitleFontSize").value = 14
@@ -773,8 +798,8 @@ document.getElementById("preset3").addEventListener("click", () => {
   document.documentElement.style.setProperty("--TitleScroll", document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth + "px")
   document.documentElement.style.setProperty("--ChannelScroll", document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth + "px")
 
-  let timer1 = (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond
-  let timer2 = (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / PixelsPerSecond
+  let timer1 = (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
+  let timer2 = (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
 
   if (timer1 < 1) {
     timer1 = 1
@@ -800,11 +825,11 @@ document.getElementById("preset3").addEventListener("click", () => {
 
 function generateOverlay() {
   document.getElementById("time").style.background = generateRGB()
-  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight /0.75) + "px"
+  document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight / 0.75) + "px"
 
-  try{
-    document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.snippet.thumbnails.default.url + '" alt="Video Thumbnail">'
-  } catch(error) {
+  try {
+    document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.thumbnail + '" alt="Video Thumbnail">'
+  } catch (error) {
     {}
   }
 
@@ -814,25 +839,110 @@ function generateOverlay() {
   TimeUpdater = setInterval(() => {
     try {
       document.getElementById("time").style.width = player.getCurrentTime() / player.getDuration() * 100 + "%"
-    } catch(error) {
+    } catch (error) {
       document.getElementById("time").style.width = "0%"
     }
 
   }, 500);
 }
 
-/* CODE FOR OVERLAY */
+// CODE FOR OVERLAY END
 
 function generateRGB() {
-  let MyColor = [0,0,0]
-  MyColor[Math.floor(Math.random()*3)] = 255
+  let MyColor = [0, 0, 0]
+  MyColor[Math.floor(Math.random() * 3)] = 255
 
-  let SecondIndex = Math.floor(Math.random()*4)
+  let SecondIndex = Math.floor(Math.random() * 4)
 
-  if (MyColor[SecondIndex] == 0){
-    MyColor[SecondIndex] = Math.floor(Math.random()*256)
+  if (MyColor[SecondIndex] == 0) {
+    MyColor[SecondIndex] = Math.floor(Math.random() * 256)
   } else {
-    MyColor[(SecondIndex + 1) % 2] = Math.floor(Math.random()*256)
+    MyColor[(SecondIndex + 1) % 2] = Math.floor(Math.random() * 256)
   }
   return "rgb(" + MyColor[0] + "," + MyColor[1] + "," + MyColor[2] + ")"
+}
+
+function newRequestFromIDs() {
+  if (xml.readyState == 4) {
+    data = JSON.parse(xml.response).items
+    let InnerHTMLData = ""
+    for (video of data) {
+      video_data[video.id] = {
+        "channel": video.snippet.channelTitle,
+        "title": video.snippet.title,
+        "thumbnail": video.snippet.thumbnails.default.url,
+        "duration": convertTime(video.contentDetails.duration),
+        "id": video.id,
+        "views": video.statistics.viewCount,
+        "likes": video.statistics.likeCount,
+        "dislikes": video.statistics.dislikeCount
+      }
+      InnerHTMLData += '<section onclick="AddVideo(this)" data-videoid="' + video_data[video.id].id + '">' + '<img src="' + video_data[video.id].thumbnail + '">' + "<span>" + "<h1>" + video_data[video.id].title + "</h1>" + '<p class="VideoItem"><i class="fas fa-clock"></i>' + video_data[video.id].duration + "</p>" + '<p class="VideoItem"><i class="fas fa-eye"></i>' + video_data[video.id].views + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-up"></i>' + video_data[video.id].likes + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-down"></i>' + video_data[video.id].dislikes + "</p>" + "<p>" + video_data[video.id].channel + "</p>" + "</span>" + "</section>"
+    }
+    document.getElementById("SearchResults").innerHTML = InnerHTMLData
+    loading = false
+  }
+}
+
+function requestFromIDs() {
+  if (xml.readyState == 4) {
+    data = JSON.parse(xml.response).items
+    let InnerHTMLData = ""
+    for (video of data) {
+      video_data[video.id] = {
+        "channel": video.snippet.channelTitle,
+        "title": video.snippet.title,
+        "thumbnail": video.snippet.thumbnails.default.url,
+        "duration": convertTime(video.contentDetails.duration),
+        "id": video.id,
+        "views": video.statistics.viewCount,
+        "likes": video.statistics.likeCount,
+        "dislikes": video.statistics.dislikeCount
+      }
+      InnerHTMLData += '<section onclick="AddVideo(this)" data-videoid="' + video_data[video.id].id + '">' + '<img src="' + video_data[video.id].thumbnail + '">' + "<span>" + "<h1>" + video_data[video.id].title + "</h1>" + '<p class="VideoItem"><i class="fas fa-clock"></i>' + video_data[video.id].duration + "</p>" + '<p class="VideoItem"><i class="fas fa-eye"></i>' + video_data[video.id].views + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-up"></i>' + video_data[video.id].likes + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-down"></i>' + video_data[video.id].dislikes + "</p>" + "<p>" + video_data[video.id].channel + "</p>" + "</span>" + "</section>"
+    }
+    document.getElementById("SearchResults").innerHTML += InnerHTMLData
+    loading = false
+  }
+}
+
+function convertTime(raw_timestamp) {
+  timestamps = raw_timestamp.match(/\d+\w/g)
+  // [DAYS, HOURS, MINUTES, SECONDS]
+  let values = ["00", "00", "00", "00"]
+  for (let i of timestamps) {
+    if (i[i.length - 1] === "D") {
+      if (i.length == 2) {
+        values[0] = "0" + i.substring(0, i.length - 1)
+      } else {
+        values[0] = i.substring(0, i.length - 1)
+      }
+    } else if (i[i.length - 1] === "H") {
+      if (i.length == 2) {
+        values[1] = "0" + i.substring(0, i.length - 1)
+      } else {
+        values[1] = i.substring(0, i.length - 1)
+      }
+    } else if (i[i.length - 1] === "M") {
+      if (i.length == 2) {
+        values[2] = "0" + i.substring(0, i.length - 1)
+      } else {
+        values[2] = i.substring(0, i.length - 1)
+      }
+    } else if (i[i.length - 1] === "S") {
+      if (i.length == 2) {
+        values[3] = "0" + i.substring(0, i.length - 1)
+      } else {
+        values[3] = i.substring(0, i.length - 1)
+      }
+    }
+  }
+  while (values[0] == "00") {
+    values.shift()
+  }
+  let res = ""
+  for (let i of values) {
+    res += i + ":"
+  }
+  return res.substring(0, res.length - 1)
 }

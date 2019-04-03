@@ -4,6 +4,7 @@
 
 body {
     background: #2b2b2b;
+    margin: 5px;
 }
 
 #player {
@@ -25,16 +26,26 @@ body {
     margin-left: 10px;
 }
 
-#CurrentVideoData p{
+#CurrentVideoData p {
     font-size: 1.1rem;
     margin: 0;
     color: #b6b6b6;
 }
 
-#CurrentVideoData h1{
+#CurrentVideoData span {
+    font-size: 1.1rem;
+    margin: 0;
+    color: #b6b6b6;
+}
+
+#CurrentVideoData h1 {
     font-size: 1.2rem;
     margin: 5px 0 0 0;
     color: #b6b6b6;
+}
+
+#Currently-Playing-Data {
+    margin-top: .3rem !important;
 }
 
 #AddVideos {
@@ -45,11 +56,27 @@ body {
 }
 
 #AddVideos input[type=text] {
-    width: 90vw;
+    width: 100%;
+    min-width: 0px;
     height: 2rem;
     font-size: 1.2rem;
-    background: #b6b6b6;
+    background: #8b8b8b;
     border: none;
+    border-radius: .25rem;
+    padding: .25rem;
+}
+
+#AddVideos input[type=text] {
+    outline: none;
+}
+
+#InputWrapper {
+    width: 90vw;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #3a3a3a;
 }
 
 #Search {
@@ -58,10 +85,14 @@ body {
     align-items: center;
     flex: 1;
     background: #8b8b8b;
-    -webkit-user-select: none; /* Safari */        
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* IE10+/Edge */
-    user-select: none; /* Standard */
+    -webkit-user-select: none;
+    /* Safari */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* IE10+/Edge */
+    user-select: none;
+    /* Standard */
     cursor: pointer;
 }
 
@@ -91,20 +122,50 @@ body {
     cursor: pointer;
 }
 
+#SearchResults section img {
+    max-width: 120px;
+    max-height: 90px;
+}
+
 #SearchResults section:hover {
-    background: #000000;
+    background: #2b2b2b;
+}
+
+#SearchResults section:active {
+    background: #202020;
 }
 
 #SearchResults section span h1 {
     margin: 0;
+    font-size: 1.1rem;
 }
 
 #SearchResults section span p {
     margin: 0;
+    font-size: 0.8rem;
+}
+
+#SearchResults section span p:last-of-type {
+    margin: 5px 0 0 0;
+    font-size: 0.9rem;
 }
 
 #SearchResults section span {
     margin-left: 10px;
+}
+
+.VideoItem {
+    border: #b6b6b6 1px solid;
+    border-radius: 9999rem;
+    padding: 0 5px 0 5px;
+    display: inline-flex;
+    align-items: center;
+    margin: 0 2px !important;
+}
+
+.VideoItem i {
+    font-size: 0.75rem;
+    margin-right: 2px;
 }
 
 #PlayerSettings {
@@ -120,10 +181,14 @@ body {
     text-transform: uppercase;
     cursor: pointer;
 
-    -webkit-user-select: none; /* Safari */        
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* IE10+/Edge */
-    user-select: none; /* Standard */
+    -webkit-user-select: none;
+    /* Safari */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* IE10+/Edge */
+    user-select: none;
+    /* Standard */
 }
 
 #StatusMessage {
@@ -156,7 +221,6 @@ body {
     background: #3a3a3a;
     padding: 0px 0 3px 0;
 }
-
 
 /* Overlay CSS */
 #OverlaySettings {
@@ -191,10 +255,14 @@ body {
     padding: 0 0.5rem 0 0.5rem;
     cursor: pointer;
 
-    -webkit-user-select: none; /* Safari */        
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* IE10+/Edge */
-    user-select: none; /* Standard */
+    -webkit-user-select: none;
+    /* Safari */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* IE10+/Edge */
+    user-select: none;
+    /* Standard */
 }
 
 #overlay {
@@ -254,6 +322,8 @@ body {
     bottom: 0;
 }
 
+/* Global */
+
 .PresetButton {
     padding: 5px 10px 5px 10px;
     background: #09ff00;
@@ -262,10 +332,14 @@ body {
     font-weight: bold;
     margin: 10px 5px 10px 5px;
 
-    -webkit-user-select: none; /* Safari */        
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* IE10+/Edge */
-    user-select: none; /* Standard */
+    -webkit-user-select: none;
+    /* Safari */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* IE10+/Edge */
+    user-select: none;
+    /* Standard */
 }
 
 .PresetButton:hover {
@@ -273,21 +347,52 @@ body {
 }
 
 @keyframes TitleScroll {
-    0%, 20%, 100% {
+
+    0%,
+    20%,
+    100% {
         margin-left: 0;
     }
 
-    75%, 90% {
+    75%,
+    90% {
         margin-left: calc(0px - var(--TitleScroll))
     }
 }
 
 @keyframes ChannelScroll {
-    0%, 20%, 100% {
+
+    0%,
+    20%,
+    100% {
         margin-left: 0;
     }
 
-    75%, 90% {
+    75%,
+    90% {
         margin-left: calc(0px - var(--ChannelScroll))
+    }
+}
+
+
+@media screen and (max-width:700px) {
+    #PlayerData {
+        flex-direction: column;
+    }
+
+    #player {
+        width: calc(100vw - 30px);
+        height: calc(calc(100vw - 30px) / calc(16/9));
+        min-width: initial;
+        min-height: initial;
+        margin: 0 auto;
+    }
+
+    #PlayerSettings {
+        padding-top: 1rem;
+    }
+
+    #Search p {
+        white-space: normal;
     }
 }

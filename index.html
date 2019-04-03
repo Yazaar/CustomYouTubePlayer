@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Yazaar | YouTube Player</title>
 
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <link rel="stylesheet" href="css/style.css">
 
 </head>
+
 <body>
     <section id="overlay">
-            <div id="thumbnail"><img src="img/no_thumbnail.jpg" alt=""></div>
-            <div id="right">
-                <article id="title"></article>
-                <article id="channel"></article>
-            </div>
-            <div id="time"></div>
+        <div id="thumbnail"><img src="img/no_thumbnail.jpg" alt=""></div>
+        <div id="right">
+            <article id="title"></article>
+            <article id="channel"></article>
+        </div>
+        <div id="time"></div>
     </section>
 
     <section id="OverlaySettings">
@@ -36,16 +39,20 @@
             Font Size Title: <input type="number" step=0.1 name="TitleFontSize" id="TitleFontSize">
         </section>
         <section>
-                Font Size Channel: <input type="number" step=0.1 name="ChannelFontSize" id="ChannelFontSize">
-            </section>
+            Font Size Channel: <input type="number" step=0.1 name="ChannelFontSize" id="ChannelFontSize">
+        </section>
         <section>
             Ticker Speed: <input type="number" step=0.1 name="TickerSpeed" id="TickerSpeed">
         </section>
         <section>
-            Overlay Background Color: R<input type="number" step=1 min="0" max="255" name="BGCR" id="BGCR"> G<input type="number" step=1 min="0" max="255" name="BGCG" id="BGCG"> B<input type="number" step=1 min="0" max="255" name="BGCB" id="BGCB">
+            Overlay Background Color: R<input type="number" step=1 min="0" max="255" name="BGCR" id="BGCR"> G<input
+                type="number" step=1 min="0" max="255" name="BGCG" id="BGCG"> B<input type="number" step=1 min="0"
+                max="255" name="BGCB" id="BGCB">
         </section>
         <section>
-            Overlay Text Color: R<input type="number" step=1 min="0" max="255" name="FTCR" id="FTCR"> G<input type="number" step=1 min="0" max="255" name="FTCG" id="FTCG"> B<input type="number" step=1 min="0" max="255" name="FTCB" id="FTCB"> 
+            Overlay Text Color: R<input type="number" step=1 min="0" max="255" name="FTCR" id="FTCR"> G<input
+                type="number" step=1 min="0" max="255" name="FTCG" id="FTCG"> B<input type="number" step=1 min="0"
+                max="255" name="FTCB" id="FTCB">
         </section>
     </section>
 
@@ -60,6 +67,11 @@
                 <h1>Channel:</h1>
                 <p>Channel</p>
             </section>
+            <section id="Currently-Playing-Data">
+                <span class="VideoItem"><i class="fas fa-eye"></i><span id="Currently-Playing-Views">0</span></span>
+                <span class="VideoItem"><i class="fas fa-thumbs-up"></i><span id="Currently-Playing-Likes">0</span></span>
+                <span class="VideoItem"><i class="fas fa-thumbs-up"></i><span id="Currently-Playing-Dislikes">0</span></span>
+            </section>
         </section>
     </section>
     <section id="PlayerSettings">
@@ -67,9 +79,9 @@
         <p id="StatusMessage">Yazaar | YouTube Player</p>
 
         <span id="skip">Skip</span>
-        
+
         <span id="lock">Lock queue</span>
-        
+
         <span id="shuffle">Shuffle</span>
 
         <span id="youtube">Open in YT</span>
@@ -83,12 +95,17 @@
     </section>
 
     <section id="AddVideos">
-        <input type="text" value="" id="SearchInput">
-        <span id="Search" unselectable="on"><p>Search Video</p></span>
+        <span id="InputWrapper">
+            <input type="text" value="" id="SearchInput">
+        </span>
+        <span id="Search" unselectable="on">
+            <p>Search Video</p>
+        </span>
     </section>
 
     <section id="SearchResults"></section>
 
     <script src="js/script.js"></script>
 </body>
+
 </html>
