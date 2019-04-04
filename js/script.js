@@ -15,6 +15,7 @@ let CurrentSearchMethod
 let listId
 let token
 let morePages
+let key = "AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40"
 // Main variables
 
 // Overlay variables
@@ -131,13 +132,13 @@ function RunSearch() {
         xml = new XMLHttpRequest()
         // API Call 2 (Video data from id:s)
         xml.onreadystatechange = newRequestFromIDs
-        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40", true)
+        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
         xml.send()
       }
     }
 
     CurrentSearchMethod = "video"
-    xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40&type=video&order=relevance&maxResults=25&q=" + encodeURI(SearchInput), true)
+    xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&key=" + key + "&type=video&order=relevance&maxResults=25&q=" + encodeURI(SearchInput), true)
     xml.send()
 
   } else if (SearchInput != "" && SearchMethod == "playlist") {
@@ -169,13 +170,13 @@ function RunSearch() {
         xml.onreadystatechange = newRequestFromIDs
 
         CurrentSearchMethod = "playlist"
-        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40", true)
+        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
         xml.send()
       }
     }
     listId = new URLSearchParams(SearchInput.split("?")[1])
 
-    xml.open('get', 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40&maxResults=25&playlistId=' + listId.get("list"), true)
+    xml.open('get', 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=' + key + '&maxResults=25&playlistId=' + listId.get("list"), true)
     xml.send()
   }
 }
@@ -229,12 +230,12 @@ window.addEventListener("scroll", () => {
         xml = new XMLHttpRequest()
         // API Call 2 (Video data from id:s)
         xml.onreadystatechange = requestFromIDs
-        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40", true)
+        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
         xml.send()
       }
     }
 
-    xml.open("get", "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40&maxResults=25&playlistId=" + listId.get("list") + "&pageToken=" + token, true)
+    xml.open("get", "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=" + key + "&maxResults=25&playlistId=" + listId.get("list") + "&pageToken=" + token, true)
     xml.send()
 
 
@@ -263,11 +264,11 @@ window.addEventListener("scroll", () => {
         xml = new XMLHttpRequest()
         // API Call 2 (Video data from id:s)
         xml.onreadystatechange = requestFromIDs
-        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40", true)
+        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
         xml.send()
       }
     }
-    xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&key=AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40&type=video&order=relevance&maxResults=25&q=" + encodeURI(SearchInput) + "&pageToken=" + token, true)
+    xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&key=" + key + "&type=video&order=relevance&maxResults=25&q=" + encodeURI(SearchInput) + "&pageToken=" + token, true)
     xml.send()
   }
 
