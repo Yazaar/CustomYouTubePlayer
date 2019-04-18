@@ -7,12 +7,30 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Yazaar | YouTube Player</title>
 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 
 </head>
 
 <body>
+    <section id="SwapKeyWindow">
+        <section>
+            <i class="fas fa-times" id="CloseSwapKeyWindow"></i>
+            <p>Using a private key gives you a better user experience in the way that you are not affected by other
+                users on the website!</p>
+            <input type="password" name="SwapAPIKeyInput" id="SwapAPIKeyInput" placeholder="•••••••••••••">
+            <section>
+                <span id="SaveKey" class="PresetButton">Save</span>
+                <span id="ResetKey" class="PresetButton">Reset</span>
+            </section>
+            <a href="#" target="_blank" rel="noopener noreferrer">Get started</a>
+        </section>
+    </section>
+
+    <a href="guide/guide.html" id="documentation" target="_blank" rel="noopener noreferrer">Guide</a>
+
     <section id="overlay">
         <div id="thumbnail"><img src="img/no_thumbnail.jpg" alt=""></div>
         <div id="right">
@@ -23,36 +41,75 @@
     </section>
 
     <section id="OverlaySettings">
-        <section><span id="ToggleOverlay">Toggle Overlay</span></section>
         <section>
-            <span class="PresetButton" id="preset1">Preset 1</span>
-            <span class="PresetButton" id="preset2">Preset 2</span>
-            <span class="PresetButton" id="preset3">Preset 3</span>
+            <span id="ToggleOverlay">Toggle overlay</span>
+            <span id="HideShowOverlaySettings">Hide settings</span>
         </section>
-        <section>
-            Overlay Width: <input type="number" step=0.1 name="OverlayWidth" id="OverlayWidth">
+        <section id="OverlaySettingsData">
+            <section>
+                <span class="PresetButton" id="preset1">Preset 1</span>
+                <span class="PresetButton" id="preset2">Preset 2</span>
+                <span class="PresetButton" id="preset3">Preset 3</span>
+            </section>
+            <section>
+                Overlay Width: <input type="number" step=0.1 name="OverlayWidth" id="OverlayWidth">
+            </section>
+            <section>
+                Overlay Height: <input type="number" step=0.1 name="OverlayHeight" id="OverlayHeight">
+            </section>
+            <section>
+                Font Size Title: <input type="number" step=0.1 name="TitleFontSize" id="TitleFontSize">
+            </section>
+            <section>
+                Font Size Channel: <input type="number" step=0.1 name="ChannelFontSize" id="ChannelFontSize">
+            </section>
+            <section>
+                Ticker Speed: <input type="number" step=0.1 name="TickerSpeed" id="TickerSpeed">
+            </section>
+            <section>
+                Overlay Background Color: R<input type="number" step=1 min="0" max="255" name="BGCR" id="BGCR"> G<input
+                    type="number" step=1 min="0" max="255" name="BGCG" id="BGCG"> B<input type="number" step=1 min="0"
+                    max="255" name="BGCB" id="BGCB">
+            </section>
+            <section>
+                Overlay Text Color: R<input type="number" step=1 min="0" max="255" name="FTCR" id="FTCR"> G<input
+                    type="number" step=1 min="0" max="255" name="FTCG" id="FTCG"> B<input type="number" step=1 min="0"
+                    max="255" name="FTCB" id="FTCB">
+            </section>
         </section>
+    </section>
+
+    <section id="SongrequestSettings">
         <section>
-            Overlay Height: <input type="number" step=0.1 name="OverlayHeight" id="OverlayHeight">
+            <span id="ToggleSongrequest">Toggle songrequest</span>
+            <span id="HideShowSongrequestSettings">Hide settings</span>
         </section>
-        <section>
-            Font Size Title: <input type="number" step=0.1 name="TitleFontSize" id="TitleFontSize">
-        </section>
-        <section>
-            Font Size Channel: <input type="number" step=0.1 name="ChannelFontSize" id="ChannelFontSize">
-        </section>
-        <section>
-            Ticker Speed: <input type="number" step=0.1 name="TickerSpeed" id="TickerSpeed">
-        </section>
-        <section>
-            Overlay Background Color: R<input type="number" step=1 min="0" max="255" name="BGCR" id="BGCR"> G<input
-                type="number" step=1 min="0" max="255" name="BGCG" id="BGCG"> B<input type="number" step=1 min="0"
-                max="255" name="BGCB" id="BGCB">
-        </section>
-        <section>
-            Overlay Text Color: R<input type="number" step=1 min="0" max="255" name="FTCR" id="FTCR"> G<input
-                type="number" step=1 min="0" max="255" name="FTCG" id="FTCG"> B<input type="number" step=1 min="0"
-                max="255" name="FTCB" id="FTCB">
+        <section id="SongrequestSettingsData">
+            <p class="SRTip PushRight">For Twitch only<br>Please consider to mod the connected account</p>
+            <section id="SRTMISection">
+                <p class="SRTip">Keep your TMI secret, generate new if exposed!</p>
+                TMI <input type="password" name="SRTMI" id="SRTMI" placeholder="•••••••••••••"> <a
+                    href="https://twitchapps.com/tmi/" target="_blank" rel="noopener noreferrer">Get TMI</a>
+            </section>
+            <section id="SRUsernameSection">
+                <p class="SRTip">Your twitch username (match TMI)</p>
+                Username <input type="text" name="SRUsername" id="SRUsername">
+            </section>
+            <section id="SRChannelSection">
+                <p class="SRTip">Channel to listen on</p>
+                Channel <input type="text" name="SRChannel" id="SRChannel">
+            </section>
+            <section>
+                <span class="PresetButton" id="SRConnect">CONNECT</span>
+                <span class="PresetButton" id="SRReset">RESET</span>
+            </section>
+            <section>
+                Command <input type="text" name="SRCommand" id="SRCommand" value="!yt">
+            </section>
+            <section>
+                Request limit (per user) <input type="number" name="SRRequestLimit" id="SRRequestLimit" value="2"> Mods
+                not included
+            </section>
         </section>
     </section>
 
@@ -69,8 +126,10 @@
             </section>
             <section id="Currently-Playing-Data">
                 <span class="VideoItem"><i class="fas fa-eye"></i><span id="Currently-Playing-Views">0</span></span>
-                <span class="VideoItem"><i class="fas fa-thumbs-up"></i><span id="Currently-Playing-Likes">0</span></span>
-                <span class="VideoItem"><i class="fas fa-thumbs-down"></i><span id="Currently-Playing-Dislikes">0</span></span>
+                <span class="VideoItem"><i class="fas fa-thumbs-up"></i><span
+                        id="Currently-Playing-Likes">0</span></span>
+                <span class="VideoItem"><i class="fas fa-thumbs-down"></i><span
+                        id="Currently-Playing-Dislikes">0</span></span>
             </section>
         </section>
     </section>
@@ -78,15 +137,17 @@
 
         <p id="StatusMessage">Yazaar | YouTube Player</p>
 
-        <span id="skip">Skip</span>
+        <span id="skip" class="PresetButton">Skip</span>
 
-        <span id="lock">Lock queue</span>
+        <span id="lock" class="PresetButton">Lock queue</span>
 
-        <span id="shuffle">Shuffle</span>
+        <span id="shuffle" class="PresetButton">Shuffle</span>
 
-        <span id="youtube">Open in YT</span>
+        <span id="SwapKey" class="PresetButton">Swap key</span>
 
-        <span id="QueueClick">Remove</span>
+        <span id="youtube" class="PresetButton">Open in YT</span>
+
+        <span id="QueueClick" class="PresetButton">Remove</span>
 
     </section>
 
@@ -98,9 +159,7 @@
         <span id="InputWrapper">
             <input type="text" value="" id="SearchInput">
         </span>
-        <span id="Search" unselectable="on">
-            <p>Search Video</p>
-        </span>
+        <span id="Search">Search Video</span>
     </section>
 
     <section id="SearchResults"></section>

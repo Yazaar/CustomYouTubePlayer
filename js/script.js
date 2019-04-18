@@ -26,6 +26,20 @@ let ChannelScrollStatus = false
 let tickerSpeed = 10
 // Overlay variables
 
+// Songrequest variables
+let SongrequestToggle = false
+let twitch_loading = false
+let twitch_queue = []
+let requestLimit = 2
+let twitch_socket
+let twitch_channel
+let twitch_username
+let twitch_tmi
+let twitch_command = "!yt"
+// Songrequest variables
+
+
+
 var tag = document.createElement('script');
 
 tag.src = "https://www.youtube.com/iframe_api";
@@ -35,7 +49,7 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
 
 function StartYouTubeIframe(video_id) {
-  start = false
+  // function which generates a youtube iframe with the player API.
   player = new YT.Player('player', {
     height: '390',
     width: '640',
@@ -48,17 +62,23 @@ function StartYouTubeIframe(video_id) {
 }
 
 function onYouTubeIframeAPIReady() {
+  // function which triggers when the YouTube iframe API is ready (when you are able to generate the iframe)
   document.getElementById("player").innerHTML = '<div style="background:#000000;color:#ffffff;width:100%;height:90%;display:flex;justify-content:center;align-items:center;text-align:center;overflow:hidden;"><h1>YouTube<br>READY FOR USE</h1></div>'
 }
 
 // 4. The API will call this function when the video player is ready.
-function onPlayerReady(event) {
+function onPlayerReady() {
+  // make sure that the video autoplays, this function is triggerd when the function StartYouTubeIframe is successful
   player.playVideo()
 }
 
 
 function onPlayerStateChange(event) {
+  // function which is triggerd each time the player changes state
   // YT.PlayerState. {"UNSTARTED":-1,"ENDED":0,"PLAYING":1,"PAUSED":2,"BUFFERING":3,"CUED":5}
+  if (event.data === -1 || event.data === 5){
+    return
+  }
   PlayerState = event.data
   if (event.data == YT.PlayerState.ENDED) {
     if (queue.length > 0) {
@@ -68,8 +88,8 @@ function onPlayerStateChange(event) {
       } else {
         index = 0
       }
-      
-      player.loadVideoById(queue[index].id)
+
+      player.loadVideoById(queue[index].id, 0)
 
       CurrentlyPlaying = queue[index]
       document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = queue[index].title
@@ -103,6 +123,7 @@ function onPlayerStateChange(event) {
 document.getElementById("Search").addEventListener("click", RunSearch)
 
 function RunSearch() {
+  // Run a search for youtube videos (triggerd thru the search button)
   if (loading == true) {
     return
   }
@@ -178,6 +199,61 @@ function RunSearch() {
 
     xml.open('get', 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=' + key + '&maxResults=25&playlistId=' + listId.get("list"), true)
     xml.send()
+  } else if (SearchInput != "" && SearchMethod == "specific") {
+    let xml = new XMLHttpRequest()
+    // Check if video id is valid
+    xml.onreadystatechange = function () {
+      if (xml.readyState == 4) {
+        if (JSON.parse(xml.response).error == "404 Not Found") {
+          loading = false
+          alert("Invalid video!")
+          return
+        }
+
+        // Real API Call for video data
+        let xml2 = new XMLHttpRequest()
+        let processedData
+        xml2.onreadystatechange = function () {
+          if (xml2.readyState == 4) {
+            processedData = JSON.parse(xml2.response)
+            if (processedData.items === undefined || processedData.items.length == 0) {
+              processedData = {
+                "channel": processedData.author_name,
+                "title": processedData.title,
+                "thumbnail": processedData.thumbnail_url,
+                "duration": 0,
+                "id": processedData.url.split("v=")[1],
+                "views": 0,
+                "likes": 0,
+                "dislikes": 0
+              }
+              video_data[processedData.id] = processedData
+            } else {
+              processedData = {
+                "channel": processedData.items[0].snippet.channelTitle,
+                "title": processedData.items[0].snippet.title,
+                "thumbnail": processedData.items[0].snippet.thumbnails.default.url,
+                "duration": convertTime(processedData.items[0].contentDetails.duration),
+                "id": processedData.items[0].id,
+                "views": convertNumber(processedData.items[0].statistics.viewCount),
+                "likes": convertNumber(processedData.items[0].statistics.likeCount),
+                "dislikes": convertNumber(processedData.items[0].statistics.dislikeCount)
+              }
+              video_data[processedData.id] = processedData
+            }
+            InnerHTMLData = '<section onclick="AddVideo(this)" data-videoid="' + processedData.id + '">' + '<img src="' + processedData.thumbnail + '">' + "<span>" + "<h1>" + processedData.title + "</h1>" + '<p class="VideoItem"><i class="fas fa-clock"></i>' + processedData.duration + "</p>" + '<p class="VideoItem"><i class="fas fa-eye"></i>' + processedData.views + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-up"></i>' + processedData.likes + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-down"></i>' + processedData.dislikes + "</p>" + "<p>" + processedData.channel + "</p>" + "</span>" + "</section>"
+            document.getElementById("SearchResults").innerHTML = InnerHTMLData
+            morePages = false
+            loading = false
+          }
+        }
+        xml2.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + requestId + "&key=" + key, true)
+        xml2.send()
+      }
+    }
+    let requestId = SearchInput.match(/\?[^v]*v=([^&]+)/)[1]
+    xml.open("get", "https://noembed.com/embed?url=https://www.youtube.com/watch?v=" + requestId, true)
+    xml.send()
   }
 }
 
@@ -199,7 +275,7 @@ window.addEventListener("scroll", () => {
   if (window.pageYOffset + window.innerHeight * 2 < document.querySelector("html").offsetHeight) {
     return
   }
-  if (morePages == false){
+  if (morePages == false) {
     return
   }
 
@@ -285,7 +361,7 @@ document.getElementById("skip").addEventListener("click", () => {
     }
 
 
-    player.loadVideoById(queue[index].id)
+    player.loadVideoById(queue[index].id, 0)
 
     CurrentlyPlaying = queue[index]
     document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = queue[index].title
@@ -307,6 +383,9 @@ document.getElementById("skip").addEventListener("click", () => {
       InnerHTMLData += "<section><p>" + queue[i].title + "</p></section>"
     }
     document.getElementById("queue").innerHTML = InnerHTMLData
+  } else {
+    PlayerState = 0
+    player.stopVideo()
   }
 })
 
@@ -328,6 +407,32 @@ document.getElementById("shuffle").addEventListener("click", () => {
     ShuffleStatus = true
     document.getElementById("shuffle").style.background = "#ff0900"
   }
+})
+
+document.getElementById("SwapKey").addEventListener("click", () => {
+  document.getElementById("SwapKeyWindow").style.display = "flex"
+})
+
+document.getElementById("CloseSwapKeyWindow").addEventListener("click", () => {
+  document.getElementById("SwapAPIKeyInput").value = ""
+  document.getElementById("SwapKeyWindow").style.display = "none"
+})
+
+document.getElementById("SaveKey").addEventListener("click", () => {
+  let temp = document.getElementById("SwapAPIKeyInput").value
+  if (temp != "") {
+    key = temp
+    document.getElementById("SwapAPIKeyInput").value = ""
+    document.getElementById("SwapKeyWindow").style.display = "none"
+    loading = false
+  }
+})
+
+document.getElementById("ResetKey").addEventListener("click", () => {
+  document.getElementById("SwapAPIKeyInput").value = ""
+  key = "AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40"
+  document.getElementById("SwapKeyWindow").style.display = "none"
+  loading = false
 })
 
 document.getElementById("youtube").addEventListener("click", () => {
@@ -352,7 +457,7 @@ document.getElementById("QueueClick").addEventListener("click", () => {
 })
 
 
-for (let i = 0; i < 5; i++) {
+for (let i = 0; i < 6; i++) {
   document.getElementById("PlayerSettings").querySelectorAll("span")[i].addEventListener("mouseover", (e) => {
 
     if (e.target.id == "shuffle") {
@@ -365,6 +470,8 @@ for (let i = 0; i < 5; i++) {
       document.getElementById("StatusMessage").innerHTML = "Open current video in YouTube (if embed above is blocked)"
     } else if (e.target.id == "QueueClick") {
       document.getElementById("StatusMessage").innerHTML = "Onclick event for queue"
+    } else if (e.target.id == "SwapKey") {
+      document.getElementById("StatusMessage").innerHTML = "Swap API key to unluck additional requests"
     }
   })
 }
@@ -404,7 +511,7 @@ document.getElementById("queue").addEventListener("click", (e) => {
       document.getElementById("Currently-Playing-Dislikes").innerHTML = CurrentlyPlaying.dislikes
       updateOverlay()
 
-      player.loadVideoById(queue[TargetIndex].id)
+      player.loadVideoById(queue[TargetIndex].id, 0)
 
       if (LockStatus == true) {
         queue.push(queue[TargetIndex])
@@ -465,10 +572,13 @@ document.getElementById("queue").addEventListener("click", (e) => {
 
 document.getElementById("SearchInput").addEventListener("input", (e) => {
   if (e.target.value.toLowerCase().includes("youtube.com/playlist") && e.target.value.toLowerCase().includes("?") && e.target.value.toLowerCase().includes("list=")) {
-    document.getElementById("Search").querySelector("p").innerHTML = "Search Playlist"
+    document.getElementById("Search").innerHTML = "Search Playlist"
     SearchMethod = "playlist"
+  } else if (/\?[^v]*v=[^&]+/.test(e.target.value.toLowerCase()) && /youtube.com\/watch/.test(e.target.value.toLowerCase())) {
+    document.getElementById("Search").innerHTML = "Find Video"
+    SearchMethod = "specific"
   } else {
-    document.getElementById("Search").querySelector("p").innerHTML = "Search Video"
+    document.getElementById("Search").innerHTML = "Search Video"
     SearchMethod = "video"
   }
 })
@@ -477,7 +587,12 @@ document.getElementById("SearchInput").addEventListener("input", (e) => {
 
 
 function AddVideo(data_tag) {
-  video_id = new String(data_tag.getAttribute("data-videoid"))
+  // add video to queue / play video
+  if (data_tag.nodeName == "SECTION") {
+    video_id = new String(data_tag.getAttribute("data-videoid"))
+  } else {
+    video_id = data_tag
+  }
 
   if (document.getElementById("player").nodeName == "DIV") {
     if (LockStatus == true) {
@@ -498,7 +613,7 @@ function AddVideo(data_tag) {
         queue.push(video_data[video_id])
         document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length - 1].title + "</p></section>"
       }
-      player.loadVideoById(video_id)
+      player.loadVideoById(video_id, 0)
       CurrentlyPlaying = video_data[video_id]
       document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.title
       document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.channel
@@ -516,6 +631,7 @@ function AddVideo(data_tag) {
 // CODE FOR OVERLAY START
 
 function updateOverlay() {
+  // update the overlay data
   if (OverlayToggle == true) {
 
     try {
@@ -561,14 +677,17 @@ function updateOverlay() {
 document.getElementById("ToggleOverlay").addEventListener("click", () => {
 
   if (OverlayToggle == true) {
-    document.getElementById("OverlaySettings").style.height = "2rem"
+    document.getElementById("OverlaySettingsData").style.display = "none"
     document.getElementById("OverlaySettings").style.marginTop = "0px"
     document.getElementById("overlay").style.display = "none"
+    document.getElementById("HideShowOverlaySettings").innerHTML = "Hide settings"
+    document.getElementById("HideShowOverlaySettings").style.display = "none"
     OverlayToggle = false
     clearInterval(TimeUpdater)
   } else {
-    document.getElementById("OverlaySettings").style.height = "auto"
+    document.getElementById("OverlaySettingsData").style.display = "block"
     document.getElementById("overlay").style.display = "inline-flex"
+    document.getElementById("HideShowOverlaySettings").style.display = "inline-flex"
     OverlayToggle = true
     generateOverlay()
     updateOverlay()
@@ -586,6 +705,16 @@ document.getElementById("ToggleOverlay").addEventListener("click", () => {
     document.getElementById("FTCR").value = 182
     document.getElementById("FTCG").value = 182
     document.getElementById("FTCB").value = 182
+  }
+})
+
+document.getElementById("HideShowOverlaySettings").addEventListener("click", () => {
+  if (document.getElementById("OverlaySettingsData").style.display == "block") {
+    document.getElementById("OverlaySettingsData").style.display = "none"
+    document.getElementById("HideShowOverlaySettings").innerHTML = "Show settings"
+  } else {
+    document.getElementById("OverlaySettingsData").style.display = "block"
+    document.getElementById("HideShowOverlaySettings").innerHTML = "Hide settings"
   }
 })
 
@@ -627,6 +756,7 @@ document.getElementById("BGCG").addEventListener("input", backgroundColorChanged
 document.getElementById("BGCB").addEventListener("input", backgroundColorChanged)
 
 function backgroundColorChanged() {
+  // function which is triggerd each time color changes are made for the overlay (background)
   if (document.getElementById("BGCR").value == "") {
     document.getElementById("BGCR").value = 0
   }
@@ -665,6 +795,7 @@ document.getElementById("FTCG").addEventListener("input", textColorChanged)
 document.getElementById("FTCB").addEventListener("input", textColorChanged)
 
 function textColorChanged() {
+  // function which is triggerd each time color changes are made for the overlay (font)
   if (document.getElementById("FTCR").value == "") {
     document.getElementById("FTCR").value = 0
   }
@@ -700,6 +831,7 @@ function textColorChanged() {
 
 
 document.getElementById("preset1").addEventListener("click", () => {
+  // preset 1 for the overlay
   document.getElementById("OverlayWidth").value = 300
   document.getElementById("overlay").style.width = document.getElementById("OverlayWidth").value + "px"
 
@@ -708,10 +840,10 @@ document.getElementById("preset1").addEventListener("click", () => {
   document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight / 0.75) + "px"
   document.getElementById("OverlaySettings").style.marginTop = document.getElementById("overlay").offsetHeight + 10 + "px"
 
-  document.getElementById("TitleFontSize").value = 25
+  document.getElementById("TitleFontSize").value = 18
   document.getElementById("title").style.fontSize = document.getElementById("TitleFontSize").value + "px"
 
-  document.getElementById("ChannelFontSize").value = 18
+  document.getElementById("ChannelFontSize").value = 15
   document.getElementById("channel").style.fontSize = document.getElementById("ChannelFontSize").value + "px"
 
   document.documentElement.style.setProperty("--TitleScroll", document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth + "px")
@@ -741,6 +873,7 @@ document.getElementById("preset1").addEventListener("click", () => {
 })
 
 document.getElementById("preset2").addEventListener("click", () => {
+  // preset 2 for the overaly
   document.getElementById("OverlayWidth").value = 200
   document.getElementById("overlay").style.width = document.getElementById("OverlayWidth").value + "px"
 
@@ -782,6 +915,7 @@ document.getElementById("preset2").addEventListener("click", () => {
 })
 
 document.getElementById("preset3").addEventListener("click", () => {
+  // preset 3 for the overlay
   document.getElementById("OverlayWidth").value = 250
   document.getElementById("overlay").style.width = document.getElementById("OverlayWidth").value + "px"
 
@@ -825,6 +959,7 @@ document.getElementById("preset3").addEventListener("click", () => {
 
 
 function generateOverlay() {
+  // triggerd when the user enables overlay
   document.getElementById("time").style.background = generateRGB()
   document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight / 0.75) + "px"
 
@@ -849,7 +984,393 @@ function generateOverlay() {
 
 // CODE FOR OVERLAY END
 
+// CODE FOR SONGREQUEST START
+
+document.getElementById("ToggleSongrequest").addEventListener("click", () => {
+  if (SongrequestToggle == true) {
+    SongrequestToggle = false
+    document.getElementById("SongrequestSettingsData").style.display = "none"
+    document.getElementById("HideShowSongrequestSettings").style.display = "none"
+    document.getElementById("HideShowSongrequestSettings").innerHTML = "Hide settings"
+  } else {
+    SongrequestToggle = true
+    document.getElementById("SongrequestSettingsData").style.display = "block"
+    document.getElementById("HideShowSongrequestSettings").style.display = "inline-flex"
+  }
+})
+
+document.getElementById("HideShowSongrequestSettings").addEventListener("click", () => {
+  if (document.getElementById("SongrequestSettingsData").style.display == "block") {
+    document.getElementById("SongrequestSettingsData").style.display = "none"
+    document.getElementById("HideShowSongrequestSettings").innerHTML = "Show settings"
+  } else {
+    document.getElementById("SongrequestSettingsData").style.display = "block"
+    document.getElementById("HideShowSongrequestSettings").innerHTML = "Hide settings"
+  }
+})
+
+document.getElementById("SRCommand").addEventListener("input", (e) => {
+  twitch_command = e.target.value.toLowerCase()
+})
+
+document.getElementById("SRRequestLimit").addEventListener("input", (e) => {
+  if (e.target.value < 0) {
+    document.getElementById("SRRequestLimit").value = 0
+    requestLimit = 0
+  } else {
+    requestLimit = parseInt(e.target.value)
+  }
+})
+
+document.getElementById("SRConnect").addEventListener("click", () => {
+  if (document.getElementById("SRConnect").innerHTML == "DISCONNECT") {
+    leaveChannel(twitch_channel)
+    document.getElementById("SRConnect").innerHTML = "CONNECT"
+    document.getElementById("SRChannelSection").style.display = "block"
+    return
+  }
+
+  if (twitch_socket !== undefined) {
+    twitch_channel = document.getElementById("SRChannel").value.toLowerCase()
+
+    if (twitch_channel == "") {
+      alert("Songrequest error: TMI, username or channel is empty")
+      return
+    }
+    joinChannel(twitch_channel)
+    document.getElementById("SRConnect").innerHTML = "DISCONNECT"
+    document.getElementById("SRChannelSection").style.display = "none"
+    return
+  }
+
+  twitch_tmi = document.getElementById("SRTMI").value.toLowerCase()
+  twitch_username = document.getElementById("SRUsername").value.toLowerCase()
+  twitch_channel = document.getElementById("SRChannel").value.toLowerCase()
+
+  if (twitch_tmi == "" || twitch_username == "" || twitch_channel == "") {
+    alert("Songrequest error: TMI, username or channel is empty")
+    return
+  }
+
+  twitch_socket = new WebSocket("ws://irc-ws.chat.twitch.tv:80")
+
+  twitch_socket.onopen = function () {
+    twitch_socket.send("PASS " + twitch_tmi + "\r\n")
+    twitch_socket.send("NICK " + twitch_username + "\r\n")
+    joinChannel(twitch_channel)
+    twitch_socket.send("CAP REQ :twitch.tv/tags\r\n")
+    console.log("Connected to the channel " + twitch_channel)
+    document.getElementById("SRConnect").innerHTML = "DISCONNECT"
+    document.getElementById("SRTMISection").style.display = "none"
+    document.getElementById("SRUsernameSection").style.display = "none"
+    document.getElementById("SRChannelSection").style.display = "none"
+    document.getElementById("SRReset").style.display = "inline-block"
+  }
+
+  twitch_socket.onerror = function (error) {
+    alert("Songrequest error: " + error)
+  }
+
+  twitch_socket.onmessage = function (message) {
+    if (message.data == ":tmi.twitch.tv NOTICE * :Login authentication failed\r\n") {
+      document.getElementById("SRReset").click()
+      alert(message.data)
+      return
+
+    } else if (message.data === "PING :tmi.twitch.tv\r\n") {
+      twitch_socket.send("PONG :tmi.twitch.tv\r\n")
+      return
+
+    } else if (message.data.match(/PRIVMSG #[^ ]+ :/)) {
+      if (twitch_loading === true) {
+        twitch_queue.push(message)
+      } else {
+        twitch_loading = true
+        handleMessage(message)
+      }
+    }
+  }
+
+  twitch_socket.onclose = function () {
+    document.getElementById("SRTMISection").style.display = "block"
+    document.getElementById("SRUsernameSection").style.display = "block"
+    document.getElementById("SRChannelSection").style.display = "block"
+    document.getElementById("SRConnect").innerHTML = "CONNECT"
+    twitch_socket = undefined
+    document.getElementById("SRReset").style.display = "none"
+  }
+})
+
+function handleMessage(message) {
+  // handle twitch socket message
+  console.log(getUser(message.data) + ": " + getMessage(message.data))
+  let params = getMessage(message.data).split(" ")
+  if (params[0].toLowerCase() != twitch_command) {
+    if (twitch_queue.length > 0) {
+      handleMessage(twitch_queue[0])
+      twitch_queue.shift()
+    } else {
+      twitch_loading = false
+    }
+    return
+  }
+  if (params[1].toLowerCase() == "request" && params[2] !== undefined) {
+    if (params[2].match(/v=[^&]+/) !== null) { // check if parameter 2 is a video URL or not
+      params[2] = params[2].match(/v=([^&]+)/)[1] // matched as an URL, extracting video id as parameter 2
+    }
+    processRequest({
+      "user": getUser(message.data),
+      "id": params[2],
+      "modStatus": isMod(message.data)
+    })
+    endTwitchLoad()
+    return
+  }
+  if (player === undefined) {
+    sendMessage("Youtube player is inactive!")
+    endTwitchLoad()
+    return
+  }
+  if (params[1].toLowerCase() == "wrong") {
+    handleWrongRequest(message)
+    endTwitchLoad()
+  }
+  if (params[1].toLowerCase() == "current") {
+    if (CurrentlyPlaying !== undefined) {
+      if (CurrentlyPlaying.requestedBy === undefined) {
+        sendMessage(CurrentlyPlaying.title + " by " + CurrentlyPlaying.channel)
+      } else {
+        sendMessage(CurrentlyPlaying.title + " by " + CurrentlyPlaying.channel + ". Requested by: " + CurrentlyPlaying.requestedBy)
+      }
+    }
+    endTwitchLoad()
+    return
+  }
+  if (params[1].toLowerCase() == "skip" && isMod(message.data)) {
+    document.getElementById("skip").click()
+    endTwitchLoad()
+    return
+  }
+  if (params[1].toLowerCase() == "volume" && isMod(message.data) && Number.isInteger(parseInt(params[2]))) {
+    player.setVolume(parseInt(params[2]))
+    endTwitchLoad()
+    return
+  }
+  if (params[1].toLowerCase() == "volume") {
+    sendMessage("YouTube volume: " + player.getVolume() + "%")
+    endTwitchLoad()
+    return
+  }
+  if (params[1].toLowerCase() == "pause" && isMod(message.data)) {
+    player.pauseVideo()
+    endTwitchLoad()
+    return
+  }
+  if (params[1].toLowerCase() == "play" && isMod(message.data)) {
+    player.playVideo()
+    endTwitchLoad()
+    return
+  }
+  endTwitchLoad()
+}
+
+document.getElementById("SRTMI").addEventListener("input", (e) => {
+  if (e.target.value.length == 0) {
+    document.getElementById("SRTMI").style.background = ""
+    return
+  }
+
+
+  if (/^oauth:/.test(e.target.value)) {
+    document.getElementById("SRTMI").style.background = ""
+    return
+  } else {
+    document.getElementById("SRTMI").style.background = "#ff6666"
+    return
+  }
+})
+
+document.getElementById("SRReset").addEventListener("click", () => {
+  twitch_socket.close()
+})
+
+function sendMessage(message) {
+  // send a new message to the current chat which is connected
+  twitch_socket.send("PRIVMSG #" + twitch_channel + " :" + message + "\r\n")
+  return true
+}
+
+function getMessage(line) {
+  // get the message which the user sent
+  return line.split(/PRIVMSG #[^;]+ :/)[1].slice(0, -2)
+}
+
+function getChannel(line) {
+  // get the channel which the message was sent in
+  return line.match(/PRIVMSG #([^ ]+)/)[1]
+}
+
+function getUser(line) {
+  // get the username of the user who sent the message
+  return line.match(/;display-name=([^;]+)/)[1]
+}
+
+function isMod(line) {
+  // check if the user which sent the message is a mod (or caster)
+  if (/;mod=1;/.test(line) || isCaster(line)) {
+    return true
+  } else {
+    return false
+  }
+}
+
+function isCaster(line) {
+  // check if the user which sent the message is the caster
+  if (line.match(/badges=([^;]+)/) === null) {
+    return false
+  }
+
+  if (/broadcaster/.test(line.match(/badges=([^;]+)/)[1]) === true) {
+    return true
+  } else {
+    return false
+  }
+}
+
+function joinChannel(channel) {
+  // join twitch chat
+  twitch_socket.send("JOIN #" + channel + "\r\n")
+}
+
+function leaveChannel(channel) {
+  // leave twitch chat
+  twitch_socket.send("PART #" + channel + "\r\n")
+}
+
+function handleWrongRequest(message) {
+  let user = getUser(message.data).toLowerCase()
+  for (let value in queue) {
+    if (queue[queue.length - 1 - value].requestedBy.toLowerCase() == user) {
+      queue.splice(queue.length - 1 - value, 1)
+      break
+    }
+  }
+  let InnerHTMLData = "<h1>Queue:</h1>"
+  for (let value of queue) {
+    InnerHTMLData += "<section><p>" + value.title + "</p></section>"
+  }
+  document.getElementById("queue").innerHTML = InnerHTMLData
+}
+
+function requestPathway(requestUser, requestId, isMod) {
+  // check for video duplicates and user requestlimit
+  let requestCount = 0
+  if (CurrentlyPlaying !== undefined) {
+    if (CurrentlyPlaying.id === requestId) {
+      return true
+    }
+    if (CurrentlyPlaying.requestedBy.toLowerCase() === requestUser.toLowerCase()) {
+      requestCount += 1
+    }
+  }
+  for (let queueEntity of queue) {
+    if (queueEntity.id == requestId) {
+      return true
+    }
+    if (queueEntity.requestedBy.toLowerCase() === requestUser.toLowerCase()) {
+      requestCount += 1
+    }
+  }
+  if (requestCount >= requestLimit && isMod === false) {
+    console.log("Too many songrequests from the user " + requestUser + ", please wait for 1 to play")
+    return true
+  }
+  return false
+}
+
+function processRequest(jsonData) {
+  // New valid command, checking for all command instances
+  let username = jsonData.user
+  let requestId = jsonData.id
+  let isMod = jsonData.modStatus
+  if (requestPathway(username, requestId, isMod) === true) {
+    endTwitchLoad()
+    return
+  }
+
+  let requestedVideo = new XMLHttpRequest()
+  // Check if video id is valid
+  requestedVideo.onreadystatechange = function () {
+    if (requestedVideo.readyState == 4) {
+      if (JSON.parse(requestedVideo.response).error == "404 Not Found") {
+        console.log("Invalid video!")
+        endTwitchLoad()
+        return
+      }
+      console.log("Valid video!")
+
+      // Real API Call for video data
+      let requestedVideoData = new XMLHttpRequest()
+      requestedVideoData.onreadystatechange = function () {
+        if (requestedVideoData.readyState == 4) {
+          let processedData
+          if (JSON.parse(requestedVideoData.response).items === undefined || JSON.parse(requestedVideoData.response).items.length == 0) {
+            processedData = JSON.parse(requestedVideo.response)
+            processedData = {
+              "channel": processedData.author_name,
+              "title": processedData.title,
+              "thumbnail": processedData.thumbnail_url,
+              "duration": 0,
+              "id": processedData.url.split("v=")[1],
+              "views": 0,
+              "likes": 0,
+              "dislikes": 0,
+              "requestedBy": username
+            }
+            video_data[processedData.id] = processedData
+          } else {
+            processedData = JSON.parse(requestedVideoData.response)
+            processedData = {
+              "channel": processedData.items[0].snippet.channelTitle,
+              "title": processedData.items[0].snippet.title,
+              "thumbnail": processedData.items[0].snippet.thumbnails.default.url,
+              "duration": convertTime(processedData.items[0].contentDetails.duration),
+              "id": processedData.items[0].id,
+              "views": convertNumber(processedData.items[0].statistics.viewCount),
+              "likes": convertNumber(processedData.items[0].statistics.likeCount),
+              "dislikes": convertNumber(processedData.items[0].statistics.dislikeCount),
+              "requestedBy": username
+            }
+            video_data[processedData.id] = processedData
+          }
+          AddVideo(processedData.id)
+
+        }
+      }
+      requestedVideoData.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + requestId + "&key=" + key, true)
+      requestedVideoData.send()
+    }
+  }
+  requestedVideo.open("get", "https://noembed.com/embed?url=https://www.youtube.com/watch?v=" + requestId, true)
+  requestedVideo.send()
+}
+
+function endTwitchLoad() {
+  // wait for an x amount of milliseconds before handling next message (limit twitch_sockets postrate)
+  setTimeout(() => {
+    if (twitch_queue.length > 0) {
+      handleMessage(twitch_queue[0])
+      twitch_queue.shift()
+    } else {
+      twitch_loading = false
+    }
+  }, 2000);
+}
+
+// CODE FOR SONGREQUEST END
+
 function generateRGB() {
+  // generate a RGB color with specific ruleset.
   let MyColor = [0, 0, 0]
   MyColor[Math.floor(Math.random() * 3)] = 255
 
@@ -864,6 +1385,7 @@ function generateRGB() {
 }
 
 function newRequestFromIDs() {
+  // generate video search feed (remove old data)
   if (xml.readyState == 4) {
     data = JSON.parse(xml.response).items
     let InnerHTMLData = ""
@@ -874,9 +1396,9 @@ function newRequestFromIDs() {
         "thumbnail": video.snippet.thumbnails.default.url,
         "duration": convertTime(video.contentDetails.duration),
         "id": video.id,
-        "views": video.statistics.viewCount,
-        "likes": video.statistics.likeCount,
-        "dislikes": video.statistics.dislikeCount
+        "views": convertNumber(video.statistics.viewCount),
+        "likes": convertNumber(video.statistics.likeCount),
+        "dislikes": convertNumber(video.statistics.dislikeCount)
       }
       InnerHTMLData += '<section onclick="AddVideo(this)" data-videoid="' + video_data[video.id].id + '">' + '<img src="' + video_data[video.id].thumbnail + '">' + "<span>" + "<h1>" + video_data[video.id].title + "</h1>" + '<p class="VideoItem"><i class="fas fa-clock"></i>' + video_data[video.id].duration + "</p>" + '<p class="VideoItem"><i class="fas fa-eye"></i>' + video_data[video.id].views + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-up"></i>' + video_data[video.id].likes + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-down"></i>' + video_data[video.id].dislikes + "</p>" + "<p>" + video_data[video.id].channel + "</p>" + "</span>" + "</section>"
     }
@@ -886,6 +1408,7 @@ function newRequestFromIDs() {
 }
 
 function requestFromIDs() {
+  // generate video search feed (append old data)
   if (xml.readyState == 4) {
     data = JSON.parse(xml.response).items
     let InnerHTMLData = ""
@@ -896,9 +1419,9 @@ function requestFromIDs() {
         "thumbnail": video.snippet.thumbnails.default.url,
         "duration": convertTime(video.contentDetails.duration),
         "id": video.id,
-        "views": video.statistics.viewCount,
-        "likes": video.statistics.likeCount,
-        "dislikes": video.statistics.dislikeCount
+        "views": convertNumber(video.statistics.viewCount),
+        "likes": convertNumber(video.statistics.likeCount),
+        "dislikes": convertNumber(video.statistics.dislikeCount)
       }
       InnerHTMLData += '<section onclick="AddVideo(this)" data-videoid="' + video_data[video.id].id + '">' + '<img src="' + video_data[video.id].thumbnail + '">' + "<span>" + "<h1>" + video_data[video.id].title + "</h1>" + '<p class="VideoItem"><i class="fas fa-clock"></i>' + video_data[video.id].duration + "</p>" + '<p class="VideoItem"><i class="fas fa-eye"></i>' + video_data[video.id].views + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-up"></i>' + video_data[video.id].likes + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-down"></i>' + video_data[video.id].dislikes + "</p>" + "<p>" + video_data[video.id].channel + "</p>" + "</span>" + "</section>"
     }
@@ -908,6 +1431,7 @@ function requestFromIDs() {
 }
 
 function convertTime(raw_timestamp) {
+  // convert time format which comes from the YouTube API
   timestamps = raw_timestamp.match(/\d+\w/g)
   // [DAYS, HOURS, MINUTES, SECONDS]
   let values = ["00", "00", "00", "00"]
@@ -946,4 +1470,27 @@ function convertTime(raw_timestamp) {
     res += i + ":"
   }
   return res.substring(0, res.length - 1)
+}
+
+function convertNumber(raw_number) {
+  // convert number to a clear format (1000000 >> 1,000,000)
+  try {
+    raw_number.toString()
+  } catch (e) {
+    return raw_number
+  }
+  let number = raw_number.toString()
+  let numDiff = 0
+  for (let numLoop in raw_number.toString()) {
+    if (numLoop % 3 == 0 && numLoop != 0) {
+      number = replaceAt(number, number.length - numLoop - numDiff, "," + number[number.length - numLoop - numDiff])
+      numDiff += 1
+    }
+  }
+  return number
+}
+
+function replaceAt(string, index, value) {
+  // replace index to a new value
+  return string.substring(0, index) + value + string.substring(index + 1)
 }
