@@ -1107,7 +1107,6 @@ document.getElementById("SRConnect").addEventListener("click", () => {
 
 function handleMessage(message) {
   // handle twitch socket message
-  console.log(getUser(message.data) + ": " + getMessage(message.data))
   let params = getMessage(message.data).split(" ")
   if (params[0].toLowerCase() != twitch_command) {
     if (twitch_queue.length > 0) {
@@ -1118,6 +1117,7 @@ function handleMessage(message) {
     }
     return
   }
+  console.log(getUser(message.data) + ": " + getMessage(message.data))
   if (params[1].toLowerCase() == "request" && params[2] !== undefined) {
     if (params[2].match(/v=[^&]+/) !== null) { // check if parameter 2 is a video URL or not
       params[2] = params[2].match(/v=([^&]+)/)[1] // matched as an URL, extracting video id as parameter 2
@@ -1286,7 +1286,7 @@ function requestPathway(requestUser, requestId, isMod) {
     }
   }
   if (requestCount >= requestLimit && isMod === false) {
-    console.log("Too many songrequests from the user " + requestUser + ", please wait for 1 to play")
+    sendMessage("Too many songrequests from the user " + requestUser + ", please wait for 1 to play")
     return true
   }
   return false
@@ -1307,11 +1307,10 @@ function processRequest(jsonData) {
   requestedVideo.onreadystatechange = function () {
     if (requestedVideo.readyState == 4) {
       if (JSON.parse(requestedVideo.response).error == "404 Not Found") {
-        console.log("Invalid video!")
+        sendMessage(username + " the video is invalid!")
         endTwitchLoad()
         return
       }
-      console.log("Valid video!")
 
       // Real API Call for video data
       let requestedVideoData = new XMLHttpRequest()
