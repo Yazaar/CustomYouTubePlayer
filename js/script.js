@@ -1052,7 +1052,11 @@ document.getElementById("SRConnect").addEventListener("click", () => {
     return
   }
 
-  twitch_socket = new WebSocket("ws://irc-ws.chat.twitch.tv:80")
+  if (window.location.protocol == "https:"){
+    twitch_socket = new WebSocket("wss://irc-ws.chat.twitch.tv:443")
+  }else{
+    twitch_socket = new WebSocket("ws://irc-ws.chat.twitch.tv:80")
+  }
 
   twitch_socket.onopen = function () {
     twitch_socket.send("PASS " + twitch_tmi + "\r\n")
