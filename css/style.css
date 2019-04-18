@@ -42,7 +42,7 @@ body {
     position: absolute;
     top: 0;
     right: 0;
-    transform: translate(50%,-50%);
+    transform: translate(50%, -50%);
     font-size: 1.2rem;
     width: 1.7rem;
     height: 1.7rem;
@@ -81,6 +81,27 @@ body {
 #SwapKeyWindow section input {
     width: 80%;
     margin: .5rem 0;
+}
+
+#SwapAPIKeyInput,
+#OverlayWidth,
+#OverlayHeight,
+#TitleFontSize,
+#ChannelFontSize,
+#TickerSpeed,
+#BGCB,
+#FTCB,
+#SRTMI,
+#SRUsername,
+#SRChannel,
+#SRCommand,
+#SRRequestLimit {
+    height: 1.2rem;
+    font-size: 1rem;
+    background: #8b8b8b;
+    border: none;
+    border-radius: .1rem;
+    padding: .1rem;
 }
 
 
@@ -473,11 +494,11 @@ body {
     margin-left: 10px !important;
 }
 
-#SongrequestSettingsData section{
+#SongrequestSettingsData section {
     margin: 10px 0 0 10px;
 }
 
-#SongrequestSettingsData section:last-of-type{
+#SongrequestSettingsData section:last-of-type {
     padding-bottom: .5rem;
 }
 
