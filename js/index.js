@@ -1168,6 +1168,11 @@ function handleMessage(message) {
     endTwitchLoad()
     return
   }
+  if (player === undefined) {
+    sendMessage("Player has not been initialized. Please start a video. Docs can be found here: " + window.location.origin + window.location.pathname + "pages/guide.html")
+    endTwitchLoad()
+    return
+  }
   if (params[1].toLowerCase() == "wrong") {
     handleWrongRequest(message)
     endTwitchLoad()
@@ -1191,8 +1196,15 @@ function handleMessage(message) {
     return
   }
   if (params[1].toLowerCase() == "volume" && isMod(message.data) && Number.isInteger(parseInt(params[2]))) {
-    player.setVolume(parseInt(params[2]))
-    sendMessage("The volume has been set to " + player.getVolume() + "%")
+    if(parseInt(params[2]) > 100){
+      params[2] = 100
+    } else if (parseInt(params[2]) < 0){
+      params[2] = 0
+    } else {
+      params[2] = parseInt(params[2])
+    }
+    player.setVolume(params[2])
+    sendMessage("The volume has been set to " + params[2] + "%")
     endTwitchLoad()
     return
   }
