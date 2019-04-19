@@ -236,6 +236,7 @@ function RunSearch() {
           if (xml2.readyState == 4) {
             processedData = JSON.parse(xml2.response)
             if (processedData.items === undefined || processedData.items.length == 0) {
+              processedData = JSON.parse(xml.response)
               processedData = {
                 "channel": processedData.author_name,
                 "title": processedData.title,
