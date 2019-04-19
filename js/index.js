@@ -1192,7 +1192,7 @@ function handleMessage(message) {
   }
   if (params[1].toLowerCase() == "volume" && isMod(message.data) && Number.isInteger(parseInt(params[2]))) {
     player.setVolume(parseInt(params[2]))
-    sendMessage("The volume has been set to " + player.getVolume() + "%")
+    sendMessage("The volume has been set to " + (parseInt(params[2]) % 100) + "%")
     endTwitchLoad()
     return
   }
