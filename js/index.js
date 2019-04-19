@@ -1141,7 +1141,7 @@ function handleMessage(message) {
   }
   console.log(getUser(message.data) + ": " + getMessage(message.data))
   if (params[1] === undefined) {
-    sendMessage("The docs for the player can be found here: " + window.location.origin + "/pages/guide.html")
+    sendMessage("The docs for the player can be found here: " + window.location.origin + window.location.pathname + "pages/guide.html")
     endTwitchLoad()
     return
   }
@@ -1158,12 +1158,12 @@ function handleMessage(message) {
     return
   }
   if (params[1].toLowerCase() == "help" || params[1].toLowerCase() == "docs" || params[1].toLowerCase() == "documentation" || params[1].toLowerCase() == "guide") {
-    sendMessage("The docs for the player can be found here: " + window.location.origin + "/pages/guide.html")
+    sendMessage("The docs for the player can be found here: " + window.location.origin + window.location.pathname + "pages/guide.html")
     endTwitchLoad()
     return
   }
   if (params[1].toLowerCase() == "commands") {
-    sendMessage("All commands can be found here: " + window.location.origin + "/pages/guide.html#Songrequest-Commands")
+    sendMessage("All commands can be found here: " + window.location.origin + window.location.pathname + "pages/guide.html#Songrequest-Commands")
     endTwitchLoad()
     return
   }
@@ -1213,7 +1213,7 @@ function handleMessage(message) {
     endTwitchLoad()
     return
   }
-  sendMessage("Docs for the YouTube player: " + window.location.origin + "/pages/guide.html")
+  sendMessage("Docs for the YouTube player: " + window.location.origin + window.location.pathname + "pages/guide.html")
   endTwitchLoad()
   return
 }
@@ -1334,7 +1334,7 @@ function requestPathway(requestUser, requestId, isMod) {
 
 function getQueueURL() {
   // generate a queue URL to requests.html
-  let queueURL = window.location.origin + "/pages/requests.html?v="
+  let queueURL = window.location.origin + window.location.pathname + "pages/requests.html?v="
   if (CurrentlyPlaying.requestedBy !== undefined) {
     queueURL += CurrentlyPlaying.id + "," + CurrentlyPlaying.requestedBy
   } else {
