@@ -1099,9 +1099,9 @@ document.getElementById("SRConnect").addEventListener("click", () => {
   }
 
   twitch_socket.onmessage = function (message) {
-    if (message.data == ":tmi.twitch.tv NOTICE * :Login authentication failed\r\n") {
+    if (message.data == ":tmi.twitch.tv NOTICE * :Login authentication failed\r\n" || message.data == ":tmi.twitch.tv NOTICE * :Improperly formatted auth\r\n") {
       document.getElementById("SRReset").click()
-      alert(message.data)
+      alert("Invalid TMI")
       return
 
     } else if (message.data === "PING :tmi.twitch.tv\r\n") {
@@ -1186,11 +1186,13 @@ function handleMessage(message) {
   }
   if (params[1].toLowerCase() == "skip" && isMod(message.data)) {
     document.getElementById("skip").click()
+    sendMessage("Skipped!")
     endTwitchLoad()
     return
   }
   if (params[1].toLowerCase() == "volume" && isMod(message.data) && Number.isInteger(parseInt(params[2]))) {
     player.setVolume(parseInt(params[2]))
+    sendMessage("The volume has been set to " + player.getVolume() + "%")
     endTwitchLoad()
     return
   }
@@ -1206,11 +1208,13 @@ function handleMessage(message) {
   }
   if (params[1].toLowerCase() == "pause" && isMod(message.data)) {
     player.pauseVideo()
+    sendMessage("YouTube is now paused!")
     endTwitchLoad()
     return
   }
   if (params[1].toLowerCase() == "play" && isMod(message.data)) {
     player.playVideo()
+    sendMessage("YouTube is now playing!")
     endTwitchLoad()
     return
   }
@@ -1296,6 +1300,7 @@ function handleWrongRequest(message) {
   let user = getUser(message.data).toLowerCase()
   for (let value in queue) {
     if (queue[queue.length - 1 - value].requestedBy.toLowerCase() == user) {
+      sendMessage("Removed " + queue[queue.length - 1 - value].title)
       queue.splice(queue.length - 1 - value, 1)
       break
     }
@@ -1312,6 +1317,7 @@ function requestPathway(requestUser, requestId, isMod) {
   let requestCount = 0
   if (CurrentlyPlaying !== undefined) {
     if (CurrentlyPlaying.id === requestId) {
+      sendMessage("The video id " + requestId + " is already in queue " + requestUser)
       return true
     }
     if (CurrentlyPlaying.requestedBy.toLowerCase() === requestUser.toLowerCase()) {
@@ -1406,7 +1412,7 @@ function processRequest(jsonData) {
             video_data[processedData.id] = processedData
           }
           AddVideo(processedData.id)
-
+          sendMessage("Added " + processedData.title)
         }
       }
       requestedVideoData.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + requestId + "&key=" + key, true)
