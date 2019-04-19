@@ -1,5 +1,4 @@
 // Main variables
-let xml
 let loading = false
 let data
 let SearchInput
@@ -132,7 +131,7 @@ function RunSearch() {
 
   SearchInput = document.getElementById("SearchInput").value
   if (SearchInput != "" && SearchMethod == "video") {
-    xml = new XMLHttpRequest()
+    let xml = new XMLHttpRequest()
     // API Call 1 (List videos)
     xml.onreadystatechange = function () {
       if (xml.readyState == 4) {
@@ -142,6 +141,14 @@ function RunSearch() {
 
         let ids = ""
 
+        if (data === undefined || data.constructor !== Array){
+          loading = false
+          morePages = false
+          alert("Invalid API Key, please consider swapping key")
+          document.getElementById("SwapKey").click()
+          return
+        }
+
         for (let i in data) {
           if (ids === "") {
             ids += data[i].id.videoId
@@ -150,11 +157,11 @@ function RunSearch() {
           }
         }
 
-        xml = new XMLHttpRequest()
+        let xml2 = new XMLHttpRequest()
         // API Call 2 (Video data from id:s)
-        xml.onreadystatechange = newRequestFromIDs
-        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
-        xml.send()
+        xml2.onreadystatechange = ()=>{newRequestFromIDs(xml2)}
+        xml2.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
+        xml2.send()
       }
     }
 
@@ -163,7 +170,7 @@ function RunSearch() {
     xml.send()
 
   } else if (SearchInput != "" && SearchMethod == "playlist") {
-    xml = new XMLHttpRequest()
+    let xml = new XMLHttpRequest()
     // API call 1 (List videos)
     xml.onreadystatechange = function () {
       if (xml.readyState == 4) {
@@ -178,6 +185,14 @@ function RunSearch() {
 
         let ids = ""
 
+        if (data === undefined || data.constructor !== Array){
+          loading = false
+          morePages = false
+          alert("Invalid API Key, please consider swapping key")
+          document.getElementById("SwapKey").click()
+          return
+        }
+
         for (i of data) {
           if (ids === "") {
             ids += i.snippet.resourceId.videoId
@@ -186,13 +201,13 @@ function RunSearch() {
           }
         }
 
-        xml = new XMLHttpRequest()
+        let xml2 = new XMLHttpRequest()
         // API call 2 (Video data from id:s)
-        xml.onreadystatechange = newRequestFromIDs
+        xml2.onreadystatechange = ()=>{newRequestFromIDs(xml2)}
 
         CurrentSearchMethod = "playlist"
-        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
-        xml.send()
+        xml2.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
+        xml2.send()
       }
     }
     listId = new URLSearchParams(SearchInput.split("?")[1])
@@ -282,7 +297,7 @@ window.addEventListener("scroll", () => {
   loading = true
 
   if (SearchMethod == "playlist") {
-    xml = new XMLHttpRequest()
+    let xml = new XMLHttpRequest()
     // API Call 1 (List videos)
     xml.onreadystatechange = function () {
       if (xml.readyState == 4) {
@@ -303,11 +318,11 @@ window.addEventListener("scroll", () => {
           }
         }
 
-        xml = new XMLHttpRequest()
+        let xml2 = new XMLHttpRequest()
         // API Call 2 (Video data from id:s)
-        xml.onreadystatechange = requestFromIDs
-        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
-        xml.send()
+        xml2.onreadystatechange = ()=>{requestFromIDs(xml2)}
+        xml2.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
+        xml2.send()
       }
     }
 
@@ -316,7 +331,7 @@ window.addEventListener("scroll", () => {
 
 
   } else if (SearchMethod == "video") {
-    xml = new XMLHttpRequest()
+    let xml = new XMLHttpRequest()
     // API Call 1 (List videos)
     xml.onreadystatechange = function () {
       if (xml.readyState == 4) {
@@ -337,17 +352,16 @@ window.addEventListener("scroll", () => {
           }
         }
 
-        xml = new XMLHttpRequest()
+        let xml2 = new XMLHttpRequest()
         // API Call 2 (Video data from id:s)
-        xml.onreadystatechange = requestFromIDs
-        xml.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
-        xml.send()
+        xml2.onreadystatechange = ()=>{requestFromIDs(xml2)}
+        xml2.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
+        xml2.send()
       }
     }
     xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&key=" + key + "&type=video&order=relevance&maxResults=25&q=" + encodeURI(SearchInput) + "&pageToken=" + token, true)
     xml.send()
   }
-
 })
 
 
@@ -635,7 +649,7 @@ function updateOverlay() {
   if (OverlayToggle == true) {
 
     try {
-      document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.thumbnail + '" alt="Video Thumbnail">'
+      document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.thumbnail + '" alt="YouTube video thumbnail">'
     } catch (error) {
       {}
     }
@@ -964,7 +978,7 @@ function generateOverlay() {
   document.getElementById("thumbnail").style.width = (document.getElementById("thumbnail").offsetHeight / 0.75) + "px"
 
   try {
-    document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.thumbnail + '" alt="Video Thumbnail">'
+    document.getElementById("thumbnail").innerHTML = '<img src="' + CurrentlyPlaying.thumbnail + '" alt="YouTube video thumbnail">'
   } catch (error) {
     {}
   }
@@ -1160,6 +1174,11 @@ function handleMessage(message) {
     endTwitchLoad()
     return
   }
+  if (params[1].toLowerCase() == "queue") {
+    sendMessage("Current queue: " + getQueueURL())
+    endTwitchLoad()
+    return
+  }
   if (params[1].toLowerCase() == "volume") {
     sendMessage("YouTube volume: " + player.getVolume() + "%")
     endTwitchLoad()
@@ -1292,6 +1311,24 @@ function requestPathway(requestUser, requestId, isMod) {
   return false
 }
 
+function getQueueURL(){
+  // generate a queue URL to requests.html
+  let queueURL = window.location.origin + "/pages/requests.html?v="
+  if (CurrentlyPlaying.requestedBy !== undefined){
+    queueURL += CurrentlyPlaying.id + "," + CurrentlyPlaying.requestedBy
+  } else {
+    queueURL += CurrentlyPlaying.id
+  }
+  for (i of queue){
+    if (i.requestedBy !== undefined){
+      queueURL += "&v=" + i.id + "," + i.requestedBy
+    } else {
+      queueURL +=  "&v=" + i.id
+    }
+  }
+  return queueURL
+}
+
 function processRequest(jsonData) {
   // New valid command, checking for all command instances
   let username = jsonData.user
@@ -1387,7 +1424,7 @@ function generateRGB() {
   return "rgb(" + MyColor[0] + "," + MyColor[1] + "," + MyColor[2] + ")"
 }
 
-function newRequestFromIDs() {
+function newRequestFromIDs(xml) {
   // generate video search feed (remove old data)
   if (xml.readyState == 4) {
     data = JSON.parse(xml.response).items
@@ -1410,7 +1447,7 @@ function newRequestFromIDs() {
   }
 }
 
-function requestFromIDs() {
+function requestFromIDs(xml) {
   // generate video search feed (append old data)
   if (xml.readyState == 4) {
     data = JSON.parse(xml.response).items
