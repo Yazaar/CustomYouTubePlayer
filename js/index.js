@@ -1317,18 +1317,19 @@ function requestPathway(requestUser, requestId, isMod) {
   let requestCount = 0
   if (CurrentlyPlaying !== undefined) {
     if (CurrentlyPlaying.id === requestId) {
-      sendMessage("The video id " + requestId + " is already in queue " + requestUser)
+      sendMessage("The videoid " + requestId + " is already in queue " + requestUser)
       return true
     }
-    if (CurrentlyPlaying.requestedBy.toLowerCase() === requestUser.toLowerCase()) {
+    if (CurrentlyPlaying.requestedBy !== undefined && CurrentlyPlaying.requestedBy.toLowerCase() === requestUser.toLowerCase()) {
       requestCount += 1
     }
   }
   for (let queueEntity of queue) {
     if (queueEntity.id == requestId) {
+      sendMessage("The videoid " + requestId + " is already in queue " + requestUser)
       return true
     }
-    if (queueEntity.requestedBy.toLowerCase() === requestUser.toLowerCase()) {
+    if (queueEntity.requestedBy !== undefined && queueEntity.requestedBy.toLowerCase() === requestUser.toLowerCase()) {
       requestCount += 1
     }
   }
@@ -1368,7 +1369,7 @@ function processRequest(jsonData) {
   }
 
   let requestedVideo = new XMLHttpRequest()
-  // Check if video id is valid
+  // Check if videoid is valid
   requestedVideo.onreadystatechange = function () {
     if (requestedVideo.readyState == 4) {
       if (JSON.parse(requestedVideo.response).error == "404 Not Found") {
