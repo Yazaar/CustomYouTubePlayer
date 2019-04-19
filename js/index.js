@@ -75,7 +75,7 @@ function onPlayerReady() {
 function onPlayerStateChange(event) {
   // function which is triggerd each time the player changes state
   // YT.PlayerState. {"UNSTARTED":-1,"ENDED":0,"PLAYING":1,"PAUSED":2,"BUFFERING":3,"CUED":5}
-  if (event.data === -1 || event.data === 5){
+  if (event.data === -1 || event.data === 5) {
     return
   }
   PlayerState = event.data
@@ -141,7 +141,7 @@ function RunSearch() {
 
         let ids = ""
 
-        if (data === undefined || data.constructor !== Array){
+        if (data === undefined || data.constructor !== Array) {
           loading = false
           morePages = false
           alert("Invalid API Key, please consider swapping key")
@@ -159,7 +159,9 @@ function RunSearch() {
 
         let xml2 = new XMLHttpRequest()
         // API Call 2 (Video data from id:s)
-        xml2.onreadystatechange = ()=>{newRequestFromIDs(xml2)}
+        xml2.onreadystatechange = () => {
+          newRequestFromIDs(xml2)
+        }
         xml2.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
         xml2.send()
       }
@@ -185,7 +187,7 @@ function RunSearch() {
 
         let ids = ""
 
-        if (data === undefined || data.constructor !== Array){
+        if (data === undefined || data.constructor !== Array) {
           loading = false
           morePages = false
           alert("Invalid API Key, please consider swapping key")
@@ -203,7 +205,9 @@ function RunSearch() {
 
         let xml2 = new XMLHttpRequest()
         // API call 2 (Video data from id:s)
-        xml2.onreadystatechange = ()=>{newRequestFromIDs(xml2)}
+        xml2.onreadystatechange = () => {
+          newRequestFromIDs(xml2)
+        }
 
         CurrentSearchMethod = "playlist"
         xml2.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
@@ -320,7 +324,9 @@ window.addEventListener("scroll", () => {
 
         let xml2 = new XMLHttpRequest()
         // API Call 2 (Video data from id:s)
-        xml2.onreadystatechange = ()=>{requestFromIDs(xml2)}
+        xml2.onreadystatechange = () => {
+          requestFromIDs(xml2)
+        }
         xml2.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
         xml2.send()
       }
@@ -354,7 +360,9 @@ window.addEventListener("scroll", () => {
 
         let xml2 = new XMLHttpRequest()
         // API Call 2 (Video data from id:s)
-        xml2.onreadystatechange = ()=>{requestFromIDs(xml2)}
+        xml2.onreadystatechange = () => {
+          requestFromIDs(xml2)
+        }
         xml2.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
         xml2.send()
       }
@@ -1066,9 +1074,9 @@ document.getElementById("SRConnect").addEventListener("click", () => {
     return
   }
 
-  if (window.location.protocol == "https:"){
+  if (window.location.protocol == "https:") {
     twitch_socket = new WebSocket("wss://irc-ws.chat.twitch.tv:443")
-  }else{
+  } else {
     twitch_socket = new WebSocket("ws://irc-ws.chat.twitch.tv:80")
   }
 
@@ -1122,7 +1130,7 @@ document.getElementById("SRConnect").addEventListener("click", () => {
 function handleMessage(message) {
   // handle twitch socket message
   let params = getMessage(message.data).split(" ")
-  if (params[0].toLowerCase() != twitch_command) {
+  if (params[0].toLowerCase() != twitch_command.toLowerCase()) {
     if (twitch_queue.length > 0) {
       handleMessage(twitch_queue[0])
       twitch_queue.shift()
@@ -1132,6 +1140,11 @@ function handleMessage(message) {
     return
   }
   console.log(getUser(message.data) + ": " + getMessage(message.data))
+  if (params[1] === undefined) {
+    sendMessage("The docs for the player can be found here: " + window.location.origin + "/pages/guide.html")
+    endTwitchLoad()
+    return
+  }
   if (params[1].toLowerCase() == "request" && params[2] !== undefined) {
     if (params[2].match(/v=[^&]+/) !== null) { // check if parameter 2 is a video URL or not
       params[2] = params[2].match(/v=([^&]+)/)[1] // matched as an URL, extracting video id as parameter 2
@@ -1144,14 +1157,20 @@ function handleMessage(message) {
     endTwitchLoad()
     return
   }
-  if (player === undefined) {
-    sendMessage("Youtube player is inactive!")
+  if (params[1].toLowerCase() == "help" || params[1].toLowerCase() == "docs" || params[1].toLowerCase() == "documentation" || params[1].toLowerCase() == "guide") {
+    sendMessage("The docs for the player can be found here: " + window.location.origin + "/pages/guide.html")
+    endTwitchLoad()
+    return
+  }
+  if (params[1].toLowerCase() == "commands") {
+    sendMessage("All commands can be found here: " + window.location.origin + "/pages/guide.html#Songrequest-Commands")
     endTwitchLoad()
     return
   }
   if (params[1].toLowerCase() == "wrong") {
     handleWrongRequest(message)
     endTwitchLoad()
+    return
   }
   if (params[1].toLowerCase() == "current") {
     if (CurrentlyPlaying !== undefined) {
@@ -1194,7 +1213,9 @@ function handleMessage(message) {
     endTwitchLoad()
     return
   }
+  sendMessage("Docs for the YouTube player: " + window.location.origin + "/pages/guide.html")
   endTwitchLoad()
+  return
 }
 
 document.getElementById("SRTMI").addEventListener("input", (e) => {
@@ -1311,19 +1332,19 @@ function requestPathway(requestUser, requestId, isMod) {
   return false
 }
 
-function getQueueURL(){
+function getQueueURL() {
   // generate a queue URL to requests.html
   let queueURL = window.location.origin + "/pages/requests.html?v="
-  if (CurrentlyPlaying.requestedBy !== undefined){
+  if (CurrentlyPlaying.requestedBy !== undefined) {
     queueURL += CurrentlyPlaying.id + "," + CurrentlyPlaying.requestedBy
   } else {
     queueURL += CurrentlyPlaying.id
   }
-  for (i of queue){
-    if (i.requestedBy !== undefined){
+  for (i of queue) {
+    if (i.requestedBy !== undefined) {
       queueURL += "&v=" + i.id + "," + i.requestedBy
     } else {
-      queueURL +=  "&v=" + i.id
+      queueURL += "&v=" + i.id
     }
   }
   return queueURL
