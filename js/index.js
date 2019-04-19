@@ -1196,6 +1196,7 @@ function handleMessage(message) {
     return
   }
   if (params[1].toLowerCase() == "volume" && isMod(message.data) && Number.isInteger(parseInt(params[2]))) {
+<<<<<<< HEAD
     if(parseInt(params[2]) > 100){
       params[2] = 100
     } else if (parseInt(params[2]) < 0){
@@ -1205,6 +1206,10 @@ function handleMessage(message) {
     }
     player.setVolume(params[2])
     sendMessage("The volume has been set to " + params[2] + "%")
+=======
+    player.setVolume(parseInt(params[2]))
+    sendMessage("The volume has been set to " + (parseInt(params[2]) % 100) + "%")
+>>>>>>> 62ae80a4f4f8c132cd08d3ec2cbf16efd4930001
     endTwitchLoad()
     return
   }
