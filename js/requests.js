@@ -56,7 +56,7 @@ function addDataFromRequests() {
         } else {
             temp2 = ""
         }
-        temp += "<p>" + '<a href="' + data[i].url + '" target="_blank" rel="noopener noreferrer">' + '<span class="number">' + i + "</span>" + '<span class="info">Title: ' + data[i].title + "<br>" +"Channel: " + data[i].author_name + temp2 + "</span>" + "</a>" + "</p>"
+        temp += '<a href="' + data[i].url + '" target="_blank" rel="noopener noreferrer">' + '<span class="number">' + i + "</span>" + '<span class="info">Title: ' + data[i].title + "<br>" +"Channel: " + data[i].author_name + temp2 + "</span>" + "</a>"
     }
 
     document.querySelector("article").innerHTML = temp
