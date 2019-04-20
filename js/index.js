@@ -790,15 +790,6 @@ document.getElementById("BGCB").addEventListener("input", backgroundColorChanged
 
 function backgroundColorChanged() {
   // function which is triggerd each time color changes are made for the overlay (background)
-  if (document.getElementById("BGCR").value == "") {
-    document.getElementById("BGCR").value = 0
-  }
-  if (document.getElementById("BGCG").value == "") {
-    document.getElementById("BGCG").value = 0
-  }
-  if (document.getElementById("BGCB").value == "") {
-    document.getElementById("BGCB").value = 0
-  }
 
   if (parseFloat(document.getElementById("BGCR").value) > 255) {
     document.getElementById("BGCR").value = 255
@@ -819,7 +810,27 @@ function backgroundColorChanged() {
     document.getElementById("BGCB").value = 0
   }
 
-  document.getElementById("overlay").style.background = "rgb(" + parseInt(document.getElementById("BGCR").value) + "," + parseInt(document.getElementById("BGCG").value) + "," + parseInt(document.getElementById("BGCB").value) + ")"
+  let red, green, blue
+
+  if (Number.isInteger((parseInt(document.getElementById("BGCR").value)))) {
+    red = parseInt(document.getElementById("BGCR").value)
+  } else {
+    red = 0
+  }
+
+  if (Number.isInteger((parseInt(document.getElementById("BGCG").value)))) {
+    green = parseInt(document.getElementById("BGCG").value)
+  } else {
+    green = 0
+  }
+
+  if (Number.isInteger(parseInt(document.getElementById("BGCB").value))) {
+    blue = parseInt(document.getElementById("BGCB").value)
+  } else {
+    blue = 0
+  }
+
+  document.getElementById("overlay").style.background = "rgb(" + red + "," + green + "," + blue + ")"
 }
 
 
@@ -829,15 +840,6 @@ document.getElementById("FTCB").addEventListener("input", textColorChanged)
 
 function textColorChanged() {
   // function which is triggerd each time color changes are made for the overlay (font)
-  if (document.getElementById("FTCR").value == "") {
-    document.getElementById("FTCR").value = 0
-  }
-  if (document.getElementById("FTCG").value == "") {
-    document.getElementById("FTCG").value = 0
-  }
-  if (document.getElementById("FTCB").value == "") {
-    document.getElementById("FTCB").value = 0
-  }
 
   if (parseFloat(document.getElementById("FTCR").value) > 255) {
     document.getElementById("FTCR").value = 255
@@ -858,8 +860,28 @@ function textColorChanged() {
     document.getElementById("FTCB").value = 0
   }
 
-  document.getElementById("title").style.color = "rgb(" + parseInt(document.getElementById("FTCR").value) + "," + parseInt(document.getElementById("FTCG").value) + "," + parseInt(document.getElementById("FTCB").value) + ")"
-  document.getElementById("channel").style.color = "rgb(" + parseInt(document.getElementById("FTCR").value) + "," + parseInt(document.getElementById("FTCG").value) + "," + parseInt(document.getElementById("FTCB").value) + ")"
+  let red, green, blue
+
+  if (Number.isInteger((parseInt(document.getElementById("FTCR").value)))) {
+    red = parseInt(document.getElementById("FTCR").value)
+  } else {
+    red = 0
+  }
+
+  if (Number.isInteger((parseInt(document.getElementById("FTCG").value)))) {
+    green = parseInt(document.getElementById("FTCG").value)
+  } else {
+    green = 0
+  }
+
+  if (Number.isInteger(parseInt(document.getElementById("FTCB").value))) {
+    blue = parseInt(document.getElementById("FTCB").value)
+  } else {
+    blue = 0
+  }
+
+  document.getElementById("title").style.color = "rgb(" + red + "," + green + "," + blue + ")"
+  document.getElementById("channel").style.color = "rgb(" + red + "," + green + "," + blue + ")"
 }
 
 
@@ -1080,7 +1102,7 @@ function handleMessage(message) {
   }
   console.log(getUser(message.data) + ": " + getMessage(message.data))
   if (params[1] === undefined) {
-    sendMessage("The docs for the player can be found here: " + window.location.origin + window.location.pathname.replace("index.html","") + "pages/guide.html")
+    sendMessage("The docs for the player can be found here: " + window.location.origin + window.location.pathname.replace("index.html", "") + "pages/guide.html")
     endTwitchLoad()
     return
   }
@@ -1097,17 +1119,17 @@ function handleMessage(message) {
     return
   }
   if (params[1].toLowerCase() == "help" || params[1].toLowerCase() == "docs" || params[1].toLowerCase() == "documentation" || params[1].toLowerCase() == "guide") {
-    sendMessage("The docs for the player can be found here: " + window.location.origin + window.location.pathname.replace("index.html","") + "pages/guide.html")
+    sendMessage("The docs for the player can be found here: " + window.location.origin + window.location.pathname.replace("index.html", "") + "pages/guide.html")
     endTwitchLoad()
     return
   }
   if (params[1].toLowerCase() == "commands") {
-    sendMessage("All commands can be found here: " + window.location.origin + window.location.pathname.replace("index.html","") + "pages/guide.html#Songrequest-Commands")
+    sendMessage("All commands can be found here: " + window.location.origin + window.location.pathname.replace("index.html", "") + "pages/guide.html#Songrequest-Commands")
     endTwitchLoad()
     return
   }
   if (player === undefined) {
-    sendMessage("Player has not been initialized. Please start a video. Docs can be found here: " + window.location.origin + window.location.pathname.replace("index.html","") + "pages/guide.html")
+    sendMessage("Player has not been initialized. Please start a video. Docs can be found here: " + window.location.origin + window.location.pathname.replace("index.html", "") + "pages/guide.html")
     endTwitchLoad()
     return
   }
@@ -1135,9 +1157,9 @@ function handleMessage(message) {
   }
   if (params[1].toLowerCase() == "volume" && isMod(message.data) && Number.isInteger(parseInt(params[2]))) {
 
-    if(parseInt(params[2]) > 100){
+    if (parseInt(params[2]) > 100) {
       params[2] = 100
-    } else if (parseInt(params[2]) < 0){
+    } else if (parseInt(params[2]) < 0) {
       params[2] = 0
     } else {
       params[2] = parseInt(params[2])
@@ -1169,7 +1191,7 @@ function handleMessage(message) {
     endTwitchLoad()
     return
   }
-  sendMessage("Docs for the YouTube player: " + window.location.origin + window.location.pathname.replace("index.html","") + "pages/guide.html")
+  sendMessage("Docs for the YouTube player: " + window.location.origin + window.location.pathname.replace("index.html", "") + "pages/guide.html")
   endTwitchLoad()
   return
 }
@@ -1293,7 +1315,7 @@ function requestPathway(requestUser, requestId, isMod) {
 
 function getQueueURL() {
   // generate a queue URL to requests.html
-  let queueURL = window.location.origin + window.location.pathname.replace("index.html","") + "pages/requests.html?v="
+  let queueURL = window.location.origin + window.location.pathname.replace("index.html", "") + "pages/requests.html?v="
   if (CurrentlyPlaying.requestedBy !== undefined) {
     queueURL += CurrentlyPlaying.id + "," + CurrentlyPlaying.requestedBy
   } else {
