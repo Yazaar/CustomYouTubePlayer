@@ -191,6 +191,7 @@ body {
     align-items: center;
     flex: 1;
     background: #8b8b8b;
+
     -webkit-user-select: none;
     /* Safari */
     -moz-user-select: none;
@@ -201,7 +202,6 @@ body {
     /* Standard */
     cursor: pointer;
 
-    font-family: 'Times New Roman', Times, serif;
     font-size: 1.7rem;
     margin: 0;
     padding: 0 10px 0 10px;
