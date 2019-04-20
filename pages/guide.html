@@ -65,15 +65,19 @@
             to decrease your limitations.<br>Songrequests and searching for a specific video thru an URL works without
             the API key! But it will try to use the key for an extended amount of data.</p>
         <h2 id="GoogleAPI-SwapKey">Swap Key</h2>
-        <p>First of all, open up the <a href="https://console.developers.google.com" target="_blank" rel="noopener noreferrer">google console</a>. Click "Select a project" which can be found to the right
-            of their Google logo. A window should pop up with the button "NEW PROJECT", click it. Feel free to swap the
-            project name but this is not required. Skip location and click the blue "CREATE" button. You should see
-            a loading animation around the notification icon top right, click the icon and wait until your project is
-            created. When it is done click on the new project. Wait for the page to load and open up the navigation menu (found top left).
-            Hover over "APIs & Services" and click on "Cridentials". Click on the blue button "Create credentials"
-            and then on "API key". Copy your key which should pop up and click close (feel free to restrict your key
-            but this is not required). Save the API key somewhere, nobody can use your key to gain personal information
-            but keep it safe from others to save your quotas/points.</p>
+        <ol>
+            <li>Open up the <a href="https://console.developers.google.com" target="_blank" rel="noopener noreferrer">google console</a>.</li>
+            <li>Click "Select a project" which can be found to the right of their Google logo.</li>
+            <li>A window should pop up with the button "NEW PROJECT", click it.</li>
+            <li>Feel free to swap the project name but this is not required. Skip location and click the blue "CREATE" button.</li>
+            <li>You should see
+                a loading animation around the notification icon top right, click the icon and wait until your project is created.</li>
+            <li>When it is finished click on the created project. Wait for the page to load and open up the navigation menu (found top left).</li>
+            <li>Hover over "APIs & Services" and click on "Cridentials".</li>
+            <li>Click on the blue button "Create credentials" and then on "API key".</li>
+            <li>Copy your key which should pop up and click close (feel free to restrict your key but this is not required).</li>
+            <li>Save the API key somewhere, nobody can use your key to gain personal information but keep it safe from others to save your quotas/points.</li>
+        </ol>
 
         <h1 id="Songrequest">Songrequest</h1>
         <h2 id="Songrequest-Usage">Usage</h2>
@@ -82,33 +86,44 @@
             configurable. The caster and moderators are able to request any amount of videos.<br><br>Warning, users are
             able to request anything from the YouTube platform!</p>
         <h2 id="Songrequest-Setup">Setup</h2>
-        <p>Open up the <a href="../index.html">YouTube player</a> and click "Toggle songrequest". Click "Get TMI" and
-            connect with Twitch. Copy the oauth and paste it in the TMI textbox on the player. Keep the TMI secret and
-            generate a new one thru "Get TMI" if exposed, people may use the TMI and type in your twitch chat thru YOUR
-            ACCOUNT which gives them broadcaster rights! Click "CONNECT" when all fields are filled correctly. Feel free
-            to change command thru the command field or the request limit per user thru the request limit field.</p>
+        <ol>
+            <li>Open up the <a href="../index.html">YouTube player</a>.</li>
+            <li>Click on the button "Toggle songrequest"</li>
+            <li>Click "Get TMI" and connect with Twitch.<br>
+                Keep the TMI secret and generate a new one thru "Get TMI" if exposed, people may use the TMI and type in your twitch chat thru YOUR ACCOUNT which gives them broadcaster rights!</li>
+            <li>Copy the oauth and paste it into the TMI passwordbox on the player.</li>
+            <li>Type in your twitch user account in textbox 2.</li>
+            <li>Type in the channel that you would like to listen on, usually your own twitch username.</li>
+            <li>Click on the "CONNECT" button. Should be in your channel to listen on the command found underneath</li>
+            <li>Feel free to change the command by typing in the command textbox</li>
+            <li>Feel free to change the request limit per user thru the numberfield. Mods and casters is not included.</li>
+        </ol>
         <h2 id="Songrequest-Commands">Commands</h2>
-        <p>Not all commands works before you start the YouTube player, commands with "always" is always working.<br><br></p>
-        <p>!yt request VideoURL/VideoId >> Request video (everyone, always)</p>
-        <p>!yt wrong >> Remove your latest request (everyone)</p>
-        <p>!yt current >> Get the video which is currently playing (everyone)</p>
-        <p>!yt queue >> get the video queue (everyone)</p>
-        <p>!yt guide/docs/help/documentation >> get the docs URL (everyone, always)</p>
-        <p>!yt commands >> get the docs URL, to the command section (everyone, always)</p>
-        <p>!yt volume >> Get the YouTube volume (everyone)</p>
-        <p>!yt volume 0-100 >> Change the YouTube volume (moderator)</p>
-        <p>!yt skip >> Skip the video that is currently playing (moderator)</p>
-        <p>!yt pause >> Pause the YouTube video (moderator)</p>
-        <p>!yt play >> Play the paused or ended YouTube video (moderator)</p>
+        <ul>
+            <p>Not all commands works before you start the YouTube player, commands with "always" is always working.<br><br></p>
+            <li>!yt request VideoURL/VideoId >> Request video (everyone, always)</li>
+            <li>!yt wrong >> Remove your latest request (everyone)</li>
+            <li>!yt current >> Get the video which is currently playing (everyone)</li>
+            <li>!yt queue >> get the video queue (everyone)</li>
+            <li>!yt guide/docs/help/documentation >> get the docs URL (everyone, always)</li>
+            <li>!yt commands >> get the docs URL, to the command section (everyone, always)</li>
+            <li>!yt volume >> Get the YouTube volume (everyone)</li>
+            <li>!yt volume 0-100 >> Change the YouTube volume (moderator)</li>
+            <li>!yt skip >> Skip the video that is currently playing (moderator)</li>
+            <li>!yt pause >> Pause the YouTube video (moderator)</li>
+            <li>!yt play >> Play the paused or ended YouTube video (moderator)</li>
+        </ul>
 
         <h1 id="Overlay">Overlay</h1>
         <h2 id="Overlay-Usage">Usage</h2>
         <p>Are you a streamer? If so, feel free to use the overlay functionality to show your viewers what is currently
             playing.</p>
         <h2 id="Overlay-Setup">Setup</h2>
-        <p>First of all, open up the <a href="../index.html" target="_blank" rel="noopener noreferrer">YouTube player</a> and click the button "Toggle overlay". The overlay should pop up
-            and you unlock the possibility to change the overlay settings as well as a few settings presets. I would
-            personally recommend Preset 1.</p>
+        <ol>
+            <li>Open up the <a href="../index.html" target="_blank" rel="noopener noreferrer">YouTube player</a>.</li>
+            <li>Click the button "Toggle overlay".</li>
+        </ol>
+        <p>The overlay should pop up and you unlock the possibility to change the overlay settings as well as a few settings presets. I would personally recommend number 1.</p>
 
     </main>
     <script src="../js/guide.js"></script>
