@@ -671,27 +671,12 @@ function updateOverlay() {
     document.documentElement.style.setProperty("--TitleScroll", document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth + "px")
     document.documentElement.style.setProperty("--ChannelScroll", document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth + "px")
 
-    let timer1 = (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
-    let timer2 = (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
-
-    if (timer1 < 1) {
-      timer1 = 1
-    } else if (timer1 > 60) {
-      timer1 = 60
-    }
-
-    if (timer2 < 1) {
-      timer2 = 1
-    } else if (timer2 > 60) {
-      timer2 = 60
-    }
-
     if (document.getElementById("title").offsetWidth > document.getElementById("right").offsetWidth) {
       if (TitleScrollStatus != true) {
         TitleScrollStatus = true
         let timer1 = (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
-        if (timer1 < 1) {
-          timer1 = 1
+        if (timer1 < 5) {
+          timer1 = 5
         } else if (timer1 > 60) {
           timer1 = 60
         }
@@ -708,8 +693,8 @@ function updateOverlay() {
       if (ChannelScrollStatus != true) {
         ChannelScrollStatus = true
         let timer2 = (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
-        if (timer2 < 1) {
-          timer2 = 1
+        if (timer2 < 5) {
+          timer2 = 5
         } else if (timer2 > 60) {
           timer2 = 60
         }
@@ -766,24 +751,23 @@ document.getElementById("ChannelFontSize").addEventListener("input", () => {
 
 document.getElementById("TickerSpeed").addEventListener("input", () => {
   tickerSpeed = document.getElementById("TickerSpeed").value
-  let timer1 = (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
-  let timer2 = (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
 
-  if (timer1 < 1) {
-    timer1 = 1
-  } else if (timer1 > 60) {
-    timer1 = 60
-  }
-
-  if (timer2 < 1) {
-    timer2 = 1
-  } else if (timer2 > 60) {
-    timer2 = 60
-  }
   if (TitleScrollStatus == true) {
+    let timer1 = (document.getElementById("title").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
+    if (timer1 < 5) {
+      timer1 = 5
+    } else if (timer1 > 60) {
+      timer1 = 60
+    }
     document.getElementById("title").style.animation = "TitleScroll " + timer1 + "s linear infinite"
   }
   if (ChannelScrollStatus == true) {
+    let timer2 = (document.getElementById("channel").offsetWidth - document.getElementById("right").offsetWidth) / tickerSpeed
+    if (timer2 < 5) {
+      timer2 = 5
+    } else if (timer2 > 60) {
+      timer2 = 60
+    }
     document.getElementById("channel").style.animation = "ChannelScroll " + timer2 + "s linear infinite"
   }
 })
