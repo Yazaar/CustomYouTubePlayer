@@ -1191,7 +1191,7 @@ function handleMessage(message) {
     endTwitchLoad()
     return
   }
-  sendMessage("Docs for the YouTube player: " + window.location.origin + window.location.pathname.replace("index.html", "") + "pages/guide.html")
+  sendMessage("Commands can be found here: " + window.location.origin + window.location.pathname.replace("index.html", "") + "pages/guide.html#Songrequest-Commands")
   endTwitchLoad()
   return
 }
@@ -1317,13 +1317,13 @@ function getQueueURL() {
   // generate a queue URL to requests.html
   let queueURL = window.location.origin + window.location.pathname.replace("index.html", "") + "pages/requests.html?v="
   if (CurrentlyPlaying.requestedBy !== undefined) {
-    queueURL += CurrentlyPlaying.id + "," + CurrentlyPlaying.requestedBy
+    queueURL += CurrentlyPlaying.id + "%" + CurrentlyPlaying.requestedBy
   } else {
     queueURL += CurrentlyPlaying.id
   }
   for (i of queue) {
     if (i.requestedBy !== undefined) {
-      queueURL += "&v=" + i.id + "," + i.requestedBy
+      queueURL += "&v=" + i.id + "%" + i.requestedBy
     } else {
       queueURL += "&v=" + i.id
     }

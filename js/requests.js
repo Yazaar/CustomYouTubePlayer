@@ -5,13 +5,13 @@ let params = new URL(window.location.href).searchParams.getAll("v") // get param
 let res = []
 
 if (params.length == 0){
-    document.querySelector("article").innerHTML = "Invalid url<br>example url: " + window.location.href + "?v=hLjht9uJWgw&v=SItEOFwnKtQ,Yazaar"
+    document.querySelector("article").innerHTML = "Invalid url<br>example url: " + window.location.href + "?v=hLjht9uJWgw&v=SItEOFwnKtQ%Yazaar"
 }
 
 // loop thru the parameters and check if twitch chat requested it
 for (let param of params){
-    if (/,/.test(param)){
-        res.push(param.split(",")[0]) // found id + user
+    if (/%/.test(param)){
+        res.push(param.split("%")[0]) // found id + user
     } else {
         res.push(param) // found id
     }
@@ -31,8 +31,8 @@ function getDataFromId(id) {
             data[res.indexOf(id)] = JSON.parse(xml.response)
             data[res.indexOf(id)].videoId = id
 
-            if(/,/.test(params[res.indexOf(id)])){
-                data[res.indexOf(id)].requestedBy = params[res.indexOf(id)].split(",")[1]
+            if(/%/.test(params[res.indexOf(id)])){
+                data[res.indexOf(id)].requestedBy = params[res.indexOf(id)].split("%")[1]
             }
             completedRequests++
             if (completedRequests == res.length) {
