@@ -6,7 +6,6 @@ let video_id
 let video_data = {}
 let queue = []
 let PlayerState
-let ShuffleStatus = false
 let LockStatus = false
 let CurrentlyPlaying
 let SearchMethod
@@ -15,6 +14,10 @@ let listId
 let token
 let morePages
 let key = "AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40"
+let playerReady = false
+if (typeof(window.localStorage.getItem('YTAPIKEY')) === 'string') {
+  key = window.localStorage.getItem('YTAPIKEY')
+}
 // Main variables
 
 // Overlay variables
@@ -36,6 +39,22 @@ let twitch_username
 let twitch_tmi
 let twitch_command = "!yt"
 // Songrequest variables
+
+// Socket variables
+let SocketToggle = false
+let socketConnecting = false
+let socketConnection
+let socketData = {
+  channel: '',
+  title: '',
+  currentTime: 0,
+  totalTime: 0,
+  paused: false,
+  tabId: -1,
+  videoId: ''
+}
+let socketLoop = false
+// Socket variables
 
 
 
@@ -68,6 +87,7 @@ function onYouTubeIframeAPIReady() {
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady() {
   // make sure that the video autoplays, this function is triggerd when the function StartYouTubeIframe is successful
+  playerReady = true
   player.playVideo()
 }
 
@@ -81,12 +101,7 @@ function onPlayerStateChange(event) {
   PlayerState = event.data
   if (event.data == YT.PlayerState.ENDED) {
     if (queue.length > 0) {
-      let index
-      if (ShuffleStatus == true) {
-        index = Math.floor(Math.random() * queue.length)
-      } else {
-        index = 0
-      }
+      let index = 0
 
       player.loadVideoById(queue[index].id, 0)
 
@@ -376,12 +391,7 @@ window.addEventListener("scroll", () => {
 
 document.getElementById("skip").addEventListener("click", () => {
   if (queue.length > 0) {
-    let index
-    if (ShuffleStatus == true) {
-      index = Math.floor(Math.random() * queue.length)
-    } else {
-      index = 0
-    }
+    let index = 0
 
 
     player.loadVideoById(queue[index].id, 0)
@@ -423,13 +433,17 @@ document.getElementById("lock").addEventListener("click", () => {
 })
 
 document.getElementById("shuffle").addEventListener("click", () => {
-  if (ShuffleStatus == true) {
-    ShuffleStatus = false
-    document.getElementById("shuffle").style.background = "#09ff00"
-  } else {
-    ShuffleStatus = true
-    document.getElementById("shuffle").style.background = "#ff0900"
+  for (let i = 0; i < queue.length; i++) {
+    let swapWith = Math.floor(Math.random() * queue.length)
+    let temp = Object.assign({}, queue[swapWith])
+    queue[swapWith] = Object.assign({}, queue[i])
+    queue[i] = temp
   }
+  let InnerHTMLData = "<h1>Queue:</h1>"
+  for (let i in queue) {
+    InnerHTMLData += "<section><p>" + queue[i].title + "</p></section>"
+  }
+  document.getElementById("queue").innerHTML = InnerHTMLData
 })
 
 document.getElementById("SwapKey").addEventListener("click", () => {
@@ -445,6 +459,7 @@ document.getElementById("SaveKey").addEventListener("click", () => {
   let temp = document.getElementById("SwapAPIKeyInput").value
   if (temp != "") {
     key = temp
+    window.localStorage.setItem('YTAPIKEY', temp)
     document.getElementById("SwapAPIKeyInput").value = ""
     document.getElementById("SwapKeyWindow").style.display = "none"
     loading = false
@@ -454,6 +469,7 @@ document.getElementById("SaveKey").addEventListener("click", () => {
 document.getElementById("ResetKey").addEventListener("click", () => {
   document.getElementById("SwapAPIKeyInput").value = ""
   key = "AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40"
+  window.localStorage.removeItem('YTAPIKEY')
   document.getElementById("SwapKeyWindow").style.display = "none"
   loading = false
 })
@@ -484,7 +500,7 @@ for (let i = 0; i < 6; i++) {
   document.getElementById("PlayerSettings").querySelectorAll("span")[i].addEventListener("mouseover", (e) => {
 
     if (e.target.id == "shuffle") {
-      document.getElementById("StatusMessage").innerHTML = "Pick video randomly"
+      document.getElementById("StatusMessage").innerHTML = "Shuffle the queue"
     } else if (e.target.id == "skip") {
       document.getElementById("StatusMessage").innerHTML = "Skip to next video"
     } else if (e.target.id == "lock") {
@@ -905,7 +921,7 @@ document.getElementById("preset1").addEventListener("click", () => {
 })
 
 document.getElementById("preset2").addEventListener("click", () => {
-  // preset 2 for the overaly
+  // preset 2 for the overlay
   document.getElementById("OverlayWidth").value = 200
   document.getElementById("overlay").style.width = document.getElementById("OverlayWidth").value + "px"
 
@@ -966,6 +982,136 @@ function generateOverlay() {
 }
 
 // CODE FOR OVERLAY END
+
+// CODE FOR SOCKET START
+
+function updateSocket() {
+  if (playerReady !== true) {
+    return
+  }
+  let noChanges = true
+
+  // check if title has changed
+  if (CurrentlyPlaying.title !== socketData.title) {
+    socketData.title = CurrentlyPlaying.title
+    noChanges = false
+  }
+  
+  let temp = player.getCurrentTime()
+  if (isFinite(temp) === false) {
+    temp = 0
+  }
+  if (temp !== socketData.currentTime) {
+    socketData.currentTime = temp
+    noChanges = false
+  }
+  
+  temp = player.getDuration()
+  if (isFinite(temp) === false) {
+    temp = 0
+  }
+  if (temp !== socketData.totalTime) {
+    socketData.totalTime = temp
+    noChanges = false
+  }
+  
+  temp = player.getPlayerState() === YT.PlayerState.PAUSED
+  if (temp !== socketData.paused) {
+    socketData.paused = temp
+    noChanges = false
+  }
+  
+  // check if channel has changed
+  if (CurrentlyPlaying.channel !== socketData.channel) {
+    socketData.channel = CurrentlyPlaying.channel
+    noChanges = false
+  }
+
+  if (CurrentlyPlaying.id !== socketData.videoId){
+      socketData.videoId = CurrentlyPlaying.id
+      noChanges = false
+  }
+
+  // if changes has been done, forward the data to socket connection
+  if (noChanges === false) {
+      socketConnection.emit('ScriptTalk', {
+          event: 'p-Yazaar_YouTube_Analyzer:Changes',
+          data: socketData
+      })
+  }
+}
+
+document.getElementById('SocketButton').addEventListener('click', () => {
+  if(socketConnecting === false) {
+    let host = document.getElementById('SocketHost').value
+    let port = parseInt(document.getElementById('SocketPort').value)
+    if (host === '' || isNaN(port)) {
+      return
+    }
+    
+    socketConnecting = true
+    document.getElementById('SocketClickToCloseTip').style.display = 'block'
+    document.getElementById('SocketButton').innerText = 'Connecting'
+
+    socketConnection = io('http://' + host + ':' + port, {transports: ['websocket']})
+    socketConnection.on('connect', function(){
+      document.getElementById('SocketButton').innerText = 'Connected'
+      if (socketLoop === false) {
+        socketLoop = setInterval(updateSocket, 1000)
+      }
+    })
+
+    socketConnection.on('connect_error', function(){
+      document.getElementById('SocketButton').innerText = 'Host unreachable'
+    })
+    
+    socketConnection.on('reconnect', function(e){
+      document.getElementById('SocketButton').innerText = 'Connected'
+    })
+
+    socketConnection.on('disconnect', function(){
+    })
+
+    socketConnection.on('reconnect_attempt', () => {
+        socketConnection.io.opts.transports = ['polling', 'websocket']
+    })
+
+    socketConnection.on('error', function(e){
+        console.log(e)
+    })
+  } else {
+    clearInterval(socketLoop)
+    socketLoop = false
+    socketConnection.close()
+    socketConnecting = false
+    document.getElementById('SocketClickToCloseTip').style.display = ''
+    document.getElementById('SocketButton').innerText = 'Connect'
+  }
+})
+
+document.getElementById("ToggleSocket").addEventListener("click", () => {
+  if (SocketToggle == true) {
+    SocketToggle = false
+    document.getElementById("SocketSettingsData").style.display = "none"
+    document.getElementById("HideShowSocketSettings").style.display = "none"
+    document.getElementById("HideShowSocketSettings").innerHTML = "Hide settings"
+  } else {
+    SocketToggle = true
+    document.getElementById("SocketSettingsData").style.display = "block"
+    document.getElementById("HideShowSocketSettings").style.display = "inline-flex"
+  }
+})
+
+document.getElementById("HideShowSocketSettings").addEventListener("click", () => {
+  if (document.getElementById("SocketSettingsData").style.display == "block") {
+    document.getElementById("SocketSettingsData").style.display = "none"
+    document.getElementById("HideShowSocketSettings").innerHTML = "Show settings"
+  } else {
+    document.getElementById("SocketSettingsData").style.display = "block"
+    document.getElementById("HideShowSocketSettings").innerHTML = "Hide settings"
+  }
+})
+// CODE FOR SOCKET END
 
 // CODE FOR SONGREQUEST START
 

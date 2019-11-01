@@ -40,7 +40,6 @@
         </div>
         <div id="time"></div>
     </section>
-
     <section id="OverlaySettings">
         <section>
             <span id="ToggleOverlay">Toggle overlay</span>
@@ -68,14 +67,35 @@
                 Ticker Speed: <input type="number" step=0.1 name="TickerSpeed" id="TickerSpeed" value="10">
             </section>
             <section>
-                Overlay Background Color: R<input type="number" step=1 min="0" max="255" name="BGCR" id="BGCR" value="63"> G<input
-                    type="number" step=1 min="0" max="255" name="BGCG" id="BGCG" value="63"> B<input type="number" step=1 min="0"
-                    max="255" name="BGCB" id="BGCB" value="63">
+                Overlay Background Color: R<input type="number" step=1 min="0" max="255" name="BGCR" id="BGCR"
+                    value="63"> G<input type="number" step=1 min="0" max="255" name="BGCG" id="BGCG" value="63"> B<input
+                    type="number" step=1 min="0" max="255" name="BGCB" id="BGCB" value="63">
             </section>
             <section>
-                Overlay Text Color: R<input type="number" step=1 min="0" max="255" name="FTCR" id="FTCR" value="182"> G<input
-                    type="number" step=1 min="0" max="255" name="FTCG" id="FTCG" value="182"> B<input type="number" step=1 min="0"
-                    max="255" name="FTCB" id="FTCB" value="182">
+                Overlay Text Color: R<input type="number" step=1 min="0" max="255" name="FTCR" id="FTCR" value="182">
+                G<input type="number" step=1 min="0" max="255" name="FTCG" id="FTCG" value="182"> B<input type="number"
+                    step=1 min="0" max="255" name="FTCB" id="FTCB" value="182">
+            </section>
+        </section>
+    </section>
+
+    <section id="SocketSettings">
+        <section>
+            <span id="ToggleSocket">Toggle Socket</span>
+            <span id="HideShowSocketSettings">Hide settings</span>
+        </section>
+        <section id="SocketSettingsData">
+            <section>
+                <p>Host</p>
+                <input type="text" name="host" id="SocketHost" placeholder="Host" value="localhost">
+            </section>
+            <section>
+                <p>Port</p>
+                <input type="number" name="port" id="SocketPort" placeholder="Port" value="80">
+            </section>
+            <section>
+                <p id="SocketClickToCloseTip">Click again to close connection</p>
+                <span class="PresetButton" id="SocketButton">Connect</span>
             </section>
         </section>
     </section>
@@ -164,7 +184,7 @@
     </section>
 
     <section id="SearchResults"></section>
-
+    <script src="js/socketio.js"></script>
     <script src="js/index.js"></script>
 </body>
 
