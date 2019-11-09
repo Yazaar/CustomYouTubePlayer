@@ -121,11 +121,7 @@ function onPlayerStateChange(event) {
         queue.splice(index, 1)
       }
 
-      let InnerHTMLData = "<h1>Queue:</h1>"
-      for (let i in queue) {
-        InnerHTMLData += "<section><p>" + queue[i].title + "</p></section>"
-      }
-      document.getElementById("queue").innerHTML = InnerHTMLData
+      updateQueue()
     }
   }
 }
@@ -411,11 +407,7 @@ document.getElementById("skip").addEventListener("click", () => {
       queue.splice(index, 1)
     }
 
-    let InnerHTMLData = "<h1>Queue:</h1>"
-    for (let i in queue) {
-      InnerHTMLData += "<section><p>" + queue[i].title + "</p></section>"
-    }
-    document.getElementById("queue").innerHTML = InnerHTMLData
+    updateQueue()
   } else {
     PlayerState = 0
     player.stopVideo()
@@ -439,11 +431,7 @@ document.getElementById("shuffle").addEventListener("click", () => {
     queue[swapWith] = Object.assign({}, queue[i])
     queue[i] = temp
   }
-  let InnerHTMLData = "<h1>Queue:</h1>"
-  for (let i in queue) {
-    InnerHTMLData += "<section><p>" + queue[i].title + "</p></section>"
-  }
-  document.getElementById("queue").innerHTML = InnerHTMLData
+  updateQueue()
 })
 
 document.getElementById("SwapKey").addEventListener("click", () => {
@@ -474,6 +462,17 @@ document.getElementById("ResetKey").addEventListener("click", () => {
   loading = false
 })
 
+document.getElementById("CloseEditVolumeWindow").addEventListener("click", () => {
+  document.getElementById("EditVolumeWindow").style.display = "none"
+})
+
+document.getElementById("EditYTVolume").addEventListener("input", (e) => {
+  let IntInputValue = parseInt(e.target.value)
+  if(IntInputValue !== e.target.val) {
+    e.target.value = IntInputValue
+  }
+})
+
 document.getElementById("youtube").addEventListener("click", () => {
   try {
     window.open("https://www.youtube.com/watch?v=" + CurrentlyPlaying.id)
@@ -496,7 +495,7 @@ document.getElementById("QueueClick").addEventListener("click", () => {
 })
 
 
-for (let i = 0; i < 6; i++) {
+for (let i = 0; i < document.querySelectorAll("#PlayerSettings span").length; i++) {
   document.getElementById("PlayerSettings").querySelectorAll("span")[i].addEventListener("mouseover", (e) => {
 
     if (e.target.id == "shuffle") {
@@ -511,6 +510,12 @@ for (let i = 0; i < 6; i++) {
       document.getElementById("StatusMessage").innerHTML = "Onclick event for queue"
     } else if (e.target.id == "SwapKey") {
       document.getElementById("StatusMessage").innerHTML = "Swap API key to unluck additional requests"
+    } else if (e.target.id == "EditVolume") {
+      document.getElementById("StatusMessage").innerHTML = "Edit the YT volume easily by typing"
+    } else if (e.target.id == "DeleteCopies") {
+      document.getElementById("StatusMessage").innerHTML = "Delete copies from the queue"
+    } else if (e.target.id == "AddLoaded") {
+      document.getElementById("StatusMessage").innerHTML = "Add all loaded videos to the queue (scroll down to load all videos you need before clicking)"
     }
   })
 }
@@ -520,6 +525,54 @@ for (let i = 0; i < document.getElementById("PlayerSettings").querySelectorAll("
     document.getElementById("StatusMessage").innerHTML = "Yazaar | YouTube Player"
   })
 }
+
+document.getElementById('AddLoaded').addEventListener('click', () => {
+  let loadedItems = document.querySelectorAll('#SearchResults section')
+  for (let i = 0; i < loadedItems.length; i++) {
+    loadedItems[i].click()
+  }
+})
+
+document.getElementById("EditVolume").addEventListener("click", () => {
+  if(player !== undefined) {
+    document.getElementById("EditYTVolume").value = player.getVolume()
+  }
+  document.getElementById("EditVolumeWindow").style.display = "flex"
+})
+
+document.getElementById("SetYTVolume").addEventListener("click", () => {
+  let NewVolume = parseInt(document.getElementById("EditYTVolume").value)
+  if (isNaN(NewVolume) || player === undefined) {
+    return
+  }
+  player.setVolume(NewVolume)
+  document.getElementById("EditVolumeWindow").style.display = "none"
+})
+
+document.getElementById("DeleteCopies").addEventListener("click", () => {
+  let past = []
+  let noDeletes = true
+  for (let i = queue.length - 1; i > -1; i--) {
+    let isCopy = false
+    for (let j = 0; j < past.length; j++) {
+      if (queue[i].id === past[j]) {
+        isCopy = true
+        break
+      }
+    }
+    if (isCopy === true) {
+      queue.splice(i, 1)
+      if (noDeletes === true) {
+        noDeletes = false
+      }
+    } else {
+      past.push(queue[i].id)
+    }
+  }
+  if(noDeletes === false) {
+    updateQueue()
+  }
+})
 
 document.getElementById("queue").addEventListener("click", (e) => {
   if (e.target.nodeName == "P") {
@@ -535,10 +588,7 @@ document.getElementById("queue").addEventListener("click", (e) => {
 
       let CodeBlock = "<h1>Queue:</h1>"
 
-      for (let i of queue) {
-        CodeBlock += "<section><p>" + i.title + "</p></section>"
-      }
-      document.getElementById("queue").innerHTML = CodeBlock
+      updateQueue()
 
     } else if (innerHTML == "play now") {
 
@@ -559,12 +609,7 @@ document.getElementById("queue").addEventListener("click", (e) => {
         queue.splice(TargetIndex, 1)
       }
 
-      let CodeBlock = "<h1>Queue:</h1>"
-
-      for (let i of queue) {
-        CodeBlock += "<section><p>" + i.title + "</p></section>"
-      }
-      document.getElementById("queue").innerHTML = CodeBlock
+      updateQueue()
 
     } else if (innerHTML == "move up") {
 
@@ -578,12 +623,7 @@ document.getElementById("queue").addEventListener("click", (e) => {
         queue[TargetIndex - 1] = temp
       }
 
-      let CodeBlock = "<h1>Queue:</h1>"
-
-      for (let i of queue) {
-        CodeBlock += "<section><p>" + i.title + "</p></section>"
-      }
-      document.getElementById("queue").innerHTML = CodeBlock
+      updateQueue()
 
     } else if (innerHTML == "move down") {
 
@@ -598,29 +638,28 @@ document.getElementById("queue").addEventListener("click", (e) => {
       }
 
 
-      let CodeBlock = "<h1>Queue:</h1>"
-
-      for (let i of queue) {
-        CodeBlock += "<section><p>" + i.title + "</p></section>"
-      }
-      document.getElementById("queue").innerHTML = CodeBlock
+      updateQueue()
     }
 
   }
 })
 
 document.getElementById("SearchInput").addEventListener("input", (e) => {
-  if (e.target.value.toLowerCase().includes("youtube.com/playlist") && e.target.value.toLowerCase().includes("?") && e.target.value.toLowerCase().includes("list=")) {
+  SearchInputChange(e.target.value.toLowerCase())
+})
+
+function SearchInputChange(InputValue) {
+  if (InputValue.includes("youtube.com/playlist") && InputValue.includes("?") && InputValue.includes("list=")) {
     document.getElementById("Search").innerHTML = "Search Playlist"
     SearchMethod = "playlist"
-  } else if (/\?[^v]*v=[^&]+/.test(e.target.value.toLowerCase()) && /youtube.com\/watch/.test(e.target.value.toLowerCase())) {
+  } else if (/\?[^v]*v=[^&]+/.test(InputValue) && /youtube.com\/watch/.test(InputValue)) {
     document.getElementById("Search").innerHTML = "Find Video"
     SearchMethod = "specific"
   } else {
     document.getElementById("Search").innerHTML = "Search Video"
     SearchMethod = "video"
   }
-})
+}
 
 //   Event listnerers end
 
@@ -636,7 +675,11 @@ function AddVideo(data_tag) {
   if (document.getElementById("player").nodeName == "DIV") {
     if (LockStatus == true) {
       queue.push(video_data[video_id])
-      document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length - 1].title + "</p></section>"
+      let p = document.createElement('p')
+      let s = document.createElement('section')
+      p.innerText = queue[queue.length - 1].title
+      s.appendChild(p)
+      document.getElementById("queue").appendChild(s)
     }
     CurrentlyPlaying = video_data[video_id]
     document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.title
@@ -650,7 +693,11 @@ function AddVideo(data_tag) {
     if (PlayerState == 0) {
       if (LockStatus == true) {
         queue.push(video_data[video_id])
-        document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length - 1].title + "</p></section>"
+        let p = document.createElement('p')
+        let s = document.createElement('section')
+        p.innerText = queue[queue.length - 1].title
+        s.appendChild(p)
+        document.getElementById("queue").appendChild(s)
       }
       player.loadVideoById(video_id, 0)
       CurrentlyPlaying = video_data[video_id]
@@ -662,7 +709,11 @@ function AddVideo(data_tag) {
       updateOverlay()
     } else {
       queue.push(video_data[video_id])
-      document.getElementById("queue").innerHTML += "<section><p>" + queue[queue.length - 1].title + "</p></section>"
+      let p = document.createElement('p')
+      let s = document.createElement('section')
+      p.innerText = queue[queue.length - 1].title
+      s.appendChild(p)
+      document.getElementById("queue").appendChild(s)
     }
   }
 }
@@ -1424,11 +1475,7 @@ function handleWrongRequest(message) {
       break
     }
   }
-  let InnerHTMLData = "<h1>Queue:</h1>"
-  for (let value of queue) {
-    InnerHTMLData += "<section><p>" + value.title + "</p></section>"
-  }
-  document.getElementById("queue").innerHTML = InnerHTMLData
+  updateQueue()
 }
 
 function requestPathway(requestUser, requestId, isMod) {
@@ -1682,3 +1729,30 @@ function replaceAt(string, index, value) {
   // replace index to a new value
   return string.substring(0, index) + value + string.substring(index + 1)
 }
+
+function updateQueue() {
+  document.getElementById('queue').innerHTML = '<h1>Queue:</h1>'
+
+  for (let i = 0; i < queue.length; i++) {
+    let s = document.createElement('section')
+    let p = document.createElement('p')
+    p.innerText = queue[i].title
+    s.appendChild(p)
+    document.getElementById('queue').appendChild(s)
+  }
+
+}
+
+function onLaunch() {
+  let params = new URLSearchParams(window.location.search)
+  if (params.get('LockQueue') !== null) {
+    document.getElementById('lock').click()
+  }
+  let searchValue = params.get('search')
+  if (searchValue !== null) {
+    document.getElementById('SearchInput').value = searchValue
+    SearchInputChange(searchValue)
+  }
+}
+
+onLaunch()

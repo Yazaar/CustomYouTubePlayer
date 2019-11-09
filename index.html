@@ -30,6 +30,15 @@
         </section>
     </section>
 
+    <section id="EditVolumeWindow">
+        <section>
+            <i class="fas fa-times" id="CloseEditVolumeWindow"></i>
+            <p>Set the volume to a whole number between 1 and 100:</p>
+            <input type="number" name="EditYTVolume" id="EditYTVolume">
+            <span id="SetYTVolume" class="PresetButton">Set</span>
+        </section>
+    </section>
+
     <a href="pages/guide.html" id="documentation" target="_blank" rel="noopener noreferrer">Guide</a>
 
     <section id="overlay">
@@ -125,6 +134,7 @@
                 <span class="PresetButton" id="SRReset">RESET</span>
             </section>
             <section>
+                <p class="SRTip">Check all of the possible commands in the guide (click top right)</p>
                 Command <input type="text" name="SRCommand" id="SRCommand" value="!yt">
             </section>
             <section>
@@ -166,9 +176,15 @@
 
         <span id="SwapKey" class="PresetButton">Swap key</span>
 
+        <span id="EditVolume" class="PresetButton">Edit volume</span>
+
         <span id="youtube" class="PresetButton">Open in YT</span>
 
         <span id="QueueClick" class="PresetButton">Remove</span>
+
+        <span id="DeleteCopies" class="PresetButton">Delete copies</span>
+        
+        <span id="AddLoaded" class="PresetButton">Add all</span>
 
     </section>
 
