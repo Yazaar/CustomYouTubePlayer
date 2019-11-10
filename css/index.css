@@ -421,15 +421,6 @@ body {
     padding: 0px 0 3px 0;
 }
 
-#queue::-webkit-scrollbar {
-    background: rgba(0, 0, 0, .5);
-    height: 0;
-}
-
-#queue::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, .2);
-}
-
 /* Overlay CSS */
 #OverlaySettings {
     background: #3a3a3a;
