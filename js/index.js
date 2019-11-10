@@ -516,6 +516,8 @@ for (let i = 0; i < document.querySelectorAll("#PlayerSettings span").length; i+
       document.getElementById("StatusMessage").innerHTML = "Delete copies from the queue"
     } else if (e.target.id == "AddLoaded") {
       document.getElementById("StatusMessage").innerHTML = "Add all loaded videos to the queue (scroll down to load all videos you need before clicking)"
+    } else if (e.target.id == "ViewNotes") {
+      document.getElementById("StatusMessage").innerHTML = "View your saved notes"
     }
   })
 }
@@ -531,6 +533,15 @@ document.getElementById('AddLoaded').addEventListener('click', () => {
   for (let i = 0; i < loadedItems.length; i++) {
     loadedItems[i].click()
   }
+})
+
+document.getElementById('CloseNotesWindow').addEventListener('click', () => {
+  document.getElementById('NotesWindow').style.display = 'none'
+  window.localStorage.setItem('UserNotes', document.getElementById('UserNotes').value)
+})
+
+document.getElementById('ViewNotes').addEventListener('click', () => {
+  document.getElementById('NotesWindow').style.display = 'flex'
 })
 
 document.getElementById("EditVolume").addEventListener("click", () => {
@@ -1752,6 +1763,10 @@ function onLaunch() {
   if (searchValue !== null) {
     document.getElementById('SearchInput').value = searchValue
     SearchInputChange(searchValue)
+  }
+  let UserNotes = window.localStorage.getItem('UserNotes')
+  if (UserNotes !== null) {
+    document.getElementById('UserNotes').value = UserNotes
   }
 }
 

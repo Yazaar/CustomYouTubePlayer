@@ -166,6 +166,67 @@ body {
     margin: .5rem 0;
 }
 
+#NotesWindow {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, .5);
+    z-index: 1;
+}
+
+#CloseNotesWindow {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+    font-size: 1.2rem;
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #3a3a3a;
+    border: #b6b6b6 .1rem solid;
+    color: #b6b6b6;
+}
+
+#NotesWindow section {
+    position: relative;
+    width: 35vmin;
+    padding: 2rem 0;
+    background: #3a3a3a;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+#NotesWindow section p {
+    width: 80%;
+    text-align: center;
+    color: #b6b6b6;
+    margin: 0;
+}
+
+#NotesWindow section textarea {
+    width: 80%;
+    max-width: 90%;
+    height: 25vh;
+    border-radius: 1rem;
+    margin: .5rem 0;
+    padding: .5rem;
+    box-sizing: border-box;
+    outline: none;
+    background: rgba(255, 255, 255, .2);
+    color: #FFFFFF;
+}
+
 #player {
     width: 30vw;
     min-width: 400px;
