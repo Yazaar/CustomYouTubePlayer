@@ -417,10 +417,8 @@ body {
 }
 
 #queue {
-    max-height: 25.5rem;
     background: #3a3a3a;
     padding: 0px 0 3px 0;
-    overflow: scroll;
 }
 
 #queue::-webkit-scrollbar {
