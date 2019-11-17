@@ -734,6 +734,10 @@ body {
     background: #036100;
 }
 
+.linkOverride {
+    color: #b6b6b6;
+}
+
 @keyframes TitleScroll {
 
     0%,

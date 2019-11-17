@@ -126,7 +126,7 @@
 
         <h1 id="Socket">Overlay</h1>
         <h2 id="Socket-Usage">Usage</h2>
-        <p>Would you like to forward what is currently playing to a third part source? If so connect, it through a websocket connection. This can be used to create overlays and much more. The website is automatically going to forward over what is currently playing and some other useful details.<br>
+        <p>Would you like to forward what is currently playing to a third part source? If so connect, it through a websocket (socketIO) connection. This can be used to create overlays and much more. The website is automatically going to forward over what is currently playing and some other useful details.<br>
         This was built for my own software called <a href="https://github.com/Yazaar/StreamElements-Local-Cloudbot" target="_blank" rel="noopener noreferrer">LocalStreamElements</a> to enable a stream overlay, feel free to use it to host a local websocket with ease.</p>
         <h2 id="Socket-Setup">Setup</h2>
         <ol>
@@ -137,6 +137,7 @@
                 The second one should be a number which represents the port that the websocket is running on. The standard is port 80 but it differs on configuration.<br>
                 http://192.168.1.50:5000 (192.168.1.50 = host and 5000 = port)
             </li>
+            <li>Your socketIO server should listen to the event ScriptTalk and it takes 1 argument which contains all of the data. If you are using my software <a href="https://github.com/Yazaar/StreamElements-Local-Cloudbot/wiki/Script-structure-(HTML)" target="_blank" rel="noopener noreferrer">LocalStreamElements</a>, listen on the event called p-Yazaar_YouTube_Analyzer:Changes</li>
         </ol>
 
         <h1 id="Overlay">Overlay</h1>
