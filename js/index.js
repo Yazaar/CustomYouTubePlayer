@@ -179,7 +179,7 @@ function RunSearch() {
     }
 
     CurrentSearchMethod = "video"
-    xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&key=" + key + "&type=video&order=relevance&maxResults=25&q=" + encodeURI(SearchInput), true)
+    xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&key=" + key + "&type=video&order=relevance&maxResults=50&q=" + encodeURI(SearchInput), true)
     xml.send()
 
   } else if (SearchInput != "" && SearchMethod == "playlist") {
@@ -227,7 +227,7 @@ function RunSearch() {
     }
     listId = new URLSearchParams(SearchInput.split("?")[1])
 
-    xml.open('get', 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=' + key + '&maxResults=25&playlistId=' + listId.get("list"), true)
+    xml.open('get', 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=' + key + '&maxResults=50&playlistId=' + listId.get("list"), true)
     xml.send()
   } else if (SearchInput != "" && SearchMethod == "specific") {
     let xml = new XMLHttpRequest()
@@ -344,7 +344,7 @@ window.addEventListener("scroll", () => {
       }
     }
 
-    xml.open("get", "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=" + key + "&maxResults=25&playlistId=" + listId.get("list") + "&pageToken=" + token, true)
+    xml.open("get", "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=" + key + "&maxResults=50&playlistId=" + listId.get("list") + "&pageToken=" + token, true)
     xml.send()
 
 
@@ -379,7 +379,7 @@ window.addEventListener("scroll", () => {
         xml2.send()
       }
     }
-    xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&key=" + key + "&type=video&order=relevance&maxResults=25&q=" + encodeURI(SearchInput) + "&pageToken=" + token, true)
+    xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&key=" + key + "&type=video&order=relevance&maxResults=50&q=" + encodeURI(SearchInput) + "&pageToken=" + token, true)
     xml.send()
   }
 })
