@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Code examples</title>
+    <link rel="stylesheet" href="../highlight_js/styles/atom-one-dark.css">
+    <link rel="stylesheet" href="../css/code.css">
+</head>
+<body>
+    <a href="../index.html">Back to player</a>
+    <h1>Discord currently playing status</h1>
+    <h2>Python</h2>
+    <p>Example code to set your discord status to whatever you are playing (by using a socket connection)</p>
+<pre><code class="python">from flask import Flask
+from flask_socketio import SocketIO
+from pypresence import Presence
+from time import time, sleep
+from threading import Thread
+
+app = Flask(__name__)
+
+sio = SocketIO(app)
+
+client_id = '645647189871165440'
+
+sinceUpdate = time()
+ping = 0
+
+displayData = {
+    'duration': 0,
+    'videoId': '',
+    'channel': '',
+    'title': ''
+}
+
+RPC = Presence(client_id,pipe=0)
+RPC.connect()
+
+def t1():
+    global ping, sinceUpdate
+    while displayData['videoId'] == '':
+        sleep(1)
+    while True:
+        if time()-5 > ping and time() > sinceUpdate:
+            ping = time()
+            sinceUpdate = time() + 15
+            RPC.update(start=time() - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y')
+        sleep(1)
+
+@sio.on('ScriptTalk')
+def newData(data):
+    global sinceUpdate, ping
+    displayData['duration'] = int(data['data']['currentTime'])
+    videoId = data['data']['videoId']
+    ping = time()
+
+    if time() > sinceUpdate and videoId != displayData['videoId']:
+        displayData['channel'] = data['data']['channel']
+        displayData['title'] = data['data']['title']
+        displayData['videoId'] = data['data']['videoId']
+        sinceUpdate = time() + 15
+        RPC.update(start=time() - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y')
+
+Thread(target=t1, daemon=True).start()
+sio.run(app, port=80)</code></pre>
+    <script src="../highlight_js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

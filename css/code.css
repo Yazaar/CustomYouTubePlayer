@@ -1,0 +1,28 @@
+body {
+    background: #333333;
+}
+
+h1, h2 {
+    margin: 0;
+    color: #cccccc;
+}
+
+p {
+    margin: .5rem 0 0 0;
+    color: #cccccc;
+}
+
+a {
+    display: inline-block;
+    font-size: 2rem;
+    color: #cccccc;
+    padding: .25rem .5rem;
+    border: #cccccc solid .1rem;
+    border-radius: .5rem;
+    text-decoration: none;
+    transition: border-radius 100ms ease-in-out;
+}
+
+a:hover {
+    border-radius: 1rem;
+}
