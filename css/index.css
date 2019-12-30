@@ -399,24 +399,23 @@ body {
     font-size: 1.3rem;
 }
 
-
-#queue section p {
+.queue section p {
     margin: 2px 0 2px 10px;
     color: #b6b6b6;
     cursor: pointer;
     display: inline-block;
 }
 
-#queue section p:hover {
+.queue section p:hover {
     background: #2b2b2b;
 }
 
-#queue h1 {
+.queue h1 {
     margin: 0 0 0 10px;
     color: #b6b6b6;
 }
 
-#queue {
+.queue {
     background: #3a3a3a;
     padding: 0px 0 3px 0;
 }
@@ -636,6 +635,10 @@ body {
 
 #SRActive section {
     margin: 0;
+}
+
+#SRQueue {
+    display: none;
 }
 
 /* Socket CSS */

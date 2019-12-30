@@ -143,6 +143,9 @@
                 <span class="PresetButton" id="SRReset">RESET</span>
             </section>
             <section>
+                Split songrequest and normal queue <input type="checkbox" name="SRSplitQueue" id="SRSplitQueue">
+            </section>
+            <section>
                 <p class="SRTip">Check all of the possible commands in the guide (click top right)</p>
                 Command <input type="text" name="SRCommand" id="SRCommand" value="!yt">
             </section>
@@ -199,7 +202,11 @@
 
     </section>
 
-    <section id="queue">
+    <section id="SRQueue" class="queue">
+        <h1>SR Queue:</h1>
+    </section>
+
+    <section id="queue" class="queue">
         <h1>Queue:</h1>
     </section>
 

@@ -1,3 +1,4 @@
+
 // Main variables
 let loading = false
 let data
@@ -30,6 +31,7 @@ let tickerSpeed = 10
 
 // Songrequest variables
 let SongrequestToggle = false
+let SongrequestQueue = []
 let twitch_loading = false
 let twitch_queue = []
 let requestLimit = 2
@@ -100,7 +102,24 @@ function onPlayerStateChange(event) {
   }
   PlayerState = event.data
   if (event.data == YT.PlayerState.ENDED) {
-    if (queue.length > 0) {
+    if (document.getElementById('SRSplitQueue').checked === true && SongrequestQueue.length > 0){
+      let index = 0
+
+      player.loadVideoById(SongrequestQueue[index].id, 0)
+
+      CurrentlyPlaying = SongrequestQueue[index]
+      document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = SongrequestQueue[index].title
+      document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = SongrequestQueue[index].channel
+      document.getElementById("Currently-Playing-Views").innerHTML = SongrequestQueue[index].views
+      document.getElementById("Currently-Playing-Likes").innerHTML = SongrequestQueue[index].likes
+      document.getElementById("Currently-Playing-Dislikes").innerHTML = SongrequestQueue[index].dislikes
+
+      updateOverlay()
+
+      SongrequestQueue.shift()
+
+      updateQueue("songrequest")
+    } else if (queue.length > 0) {
       let index = 0
 
       player.loadVideoById(queue[index].id, 0)
@@ -121,7 +140,7 @@ function onPlayerStateChange(event) {
         queue.splice(index, 1)
       }
 
-      updateQueue()
+      updateQueue("main")
     }
   }
 }
@@ -407,7 +426,7 @@ document.getElementById("skip").addEventListener("click", () => {
       queue.splice(index, 1)
     }
 
-    updateQueue()
+    updateQueue("main")
   } else {
     PlayerState = 0
     player.stopVideo()
@@ -431,7 +450,7 @@ document.getElementById("shuffle").addEventListener("click", () => {
     queue[swapWith] = Object.assign({}, queue[i])
     queue[i] = temp
   }
-  updateQueue()
+  updateQueue("main")
 })
 
 document.getElementById("SwapKey").addEventListener("click", () => {
@@ -490,6 +509,12 @@ document.getElementById("QueueClick").addEventListener("click", () => {
   } else if (innerHTML == "move up") {
     document.getElementById("QueueClick").innerHTML = "Move down"
   } else if (innerHTML == "move down") {
+    if (document.getElementById('SRSplitQueue').checked === true){
+      document.getElementById("QueueClick").innerHTML = "Swap queue"
+    } else {
+      document.getElementById("QueueClick").innerHTML = "Remove"
+    }
+  } else if (innerHTML == "swap queue") {
     document.getElementById("QueueClick").innerHTML = "Remove"
   }
 })
@@ -581,7 +606,7 @@ document.getElementById("DeleteCopies").addEventListener("click", () => {
     }
   }
   if(noDeletes === false) {
-    updateQueue()
+    updateQueue("main")
   }
 })
 
@@ -597,9 +622,7 @@ document.getElementById("queue").addEventListener("click", (e) => {
     if (innerHTML == "remove") {
       queue.splice(TargetIndex, 1)
 
-      let CodeBlock = "<h1>Queue:</h1>"
-
-      updateQueue()
+      updateQueue("main")
 
     } else if (innerHTML == "play now") {
 
@@ -620,7 +643,7 @@ document.getElementById("queue").addEventListener("click", (e) => {
         queue.splice(TargetIndex, 1)
       }
 
-      updateQueue()
+      updateQueue("main")
 
     } else if (innerHTML == "move up") {
 
@@ -634,7 +657,7 @@ document.getElementById("queue").addEventListener("click", (e) => {
         queue[TargetIndex - 1] = temp
       }
 
-      updateQueue()
+      updateQueue("main")
 
     } else if (innerHTML == "move down") {
 
@@ -649,7 +672,16 @@ document.getElementById("queue").addEventListener("click", (e) => {
       }
 
 
-      updateQueue()
+      updateQueue("main")
+    } else if (innerHTML == "swap queue") {
+
+      
+      SongrequestQueue.push(queue[TargetIndex])
+      
+      queue.splice(TargetIndex, 1)
+
+      updateQueue("main")
+      updateQueue("songrequest")
     }
 
   }
@@ -675,8 +707,20 @@ function SearchInputChange(InputValue) {
 //   Event listnerers end
 
 
-function AddVideo(data_tag) {
+function AddVideo(data_tag, queueType='main') {
   // add video to queue / play video
+
+  let QueueElement
+  let QueueObject
+
+  if (queueType === 'main'){
+    QueueElement = document.getElementById("queue")
+    QueueObject = queue
+  } else {
+    QueueElement = document.getElementById("SRQueue")
+    QueueObject = SongrequestQueue
+  }
+
   if (data_tag.nodeName == "SECTION") {
     video_id = new String(data_tag.getAttribute("data-videoid"))
   } else {
@@ -685,12 +729,12 @@ function AddVideo(data_tag) {
 
   if (document.getElementById("player").nodeName == "DIV") {
     if (LockStatus == true) {
-      queue.push(video_data[video_id])
+      QueueObject.push(video_data[video_id])
       let p = document.createElement('p')
       let s = document.createElement('section')
-      p.innerText = queue[queue.length - 1].title
+      p.innerText = QueueObject[QueueObject.length - 1].title
       s.appendChild(p)
-      document.getElementById("queue").appendChild(s)
+      QueueElement.appendChild(s)
     }
     CurrentlyPlaying = video_data[video_id]
     document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.title
@@ -702,13 +746,13 @@ function AddVideo(data_tag) {
     updateOverlay()
   } else {
     if (PlayerState == 0) {
-      if (LockStatus == true) {
-        queue.push(video_data[video_id])
+      if (LockStatus == true && queueType === 'main') {
+        QueueObject.push(video_data[video_id])
         let p = document.createElement('p')
         let s = document.createElement('section')
-        p.innerText = queue[queue.length - 1].title
+        p.innerText = QueueObject[QueueObject.length - 1].title
         s.appendChild(p)
-        document.getElementById("queue").appendChild(s)
+        QueueElement.appendChild(s)
       }
       player.loadVideoById(video_id, 0)
       CurrentlyPlaying = video_data[video_id]
@@ -719,12 +763,12 @@ function AddVideo(data_tag) {
       document.getElementById("Currently-Playing-Dislikes").innerHTML = CurrentlyPlaying.dislikes
       updateOverlay()
     } else {
-      queue.push(video_data[video_id])
+      QueueObject.push(video_data[video_id])
       let p = document.createElement('p')
       let s = document.createElement('section')
-      p.innerText = queue[queue.length - 1].title
+      p.innerText = QueueObject[QueueObject.length - 1].title
       s.appendChild(p)
-      document.getElementById("queue").appendChild(s)
+      QueueElement.appendChild(s)
     }
   }
 }
@@ -1177,6 +1221,83 @@ document.getElementById("HideShowSocketSettings").addEventListener("click", () =
 
 // CODE FOR SONGREQUEST START
 
+document.getElementById("SRQueue").addEventListener("click", (e) => {
+  if (e.target.nodeName == "P") {
+    let QueueItems = []
+    document.getElementById("SRQueue").querySelectorAll("p").forEach((element) => {
+      QueueItems.push(element)
+    })
+    let TargetIndex = QueueItems.indexOf(e.target)
+    let innerHTML = document.getElementById("QueueClick").innerHTML.toLowerCase()
+
+    if (innerHTML == "remove") {
+      SongrequestQueue.splice(TargetIndex, 1)
+
+      updateQueue("songrequest")
+
+    } else if (innerHTML == "play now") {
+
+      CurrentlyPlaying = SongrequestQueue[TargetIndex]
+      document.getElementById("Currently-Playing-Title").querySelector("p").innerHTML = CurrentlyPlaying.title
+      document.getElementById("Currently-Playing-Channel").querySelector("p").innerHTML = CurrentlyPlaying.channel
+      document.getElementById("Currently-Playing-Views").innerHTML = CurrentlyPlaying.views
+      document.getElementById("Currently-Playing-Likes").innerHTML = CurrentlyPlaying.likes
+      document.getElementById("Currently-Playing-Dislikes").innerHTML = CurrentlyPlaying.dislikes
+      updateOverlay()
+
+      player.loadVideoById(SongrequestQueue[TargetIndex].id, 0)
+
+      SongrequestQueue.splice(TargetIndex, 1)
+
+      updateQueue("songrequest")
+
+    } else if (innerHTML == "move up") {
+
+      let temp = SongrequestQueue[TargetIndex]
+
+      if (TargetIndex == 0) {
+        SongrequestQueue.push(SongrequestQueue[0])
+        SongrequestQueue.splice(0, 1)
+      } else {
+        SongrequestQueue[TargetIndex] = SongrequestQueue[TargetIndex - 1]
+        SongrequestQueue[TargetIndex - 1] = temp
+      }
+
+      updateQueue("songrequest")
+
+    } else if (innerHTML == "move down") {
+
+      let temp = SongrequestQueue[TargetIndex]
+
+      if (TargetIndex == SongrequestQueue.length - 1) {
+        SongrequestQueue.unshift(SongrequestQueue[SongrequestQueue.length - 1])
+        SongrequestQueue.splice(SongrequestQueue.length - 1, 1)
+      } else {
+        SongrequestQueue[TargetIndex] = SongrequestQueue[TargetIndex + 1]
+        SongrequestQueue[TargetIndex + 1] = temp
+      }
+
+      updateQueue("songrequest")
+    } else if (innerHTML == "swap queue") {
+
+      queue.push(SongrequestQueue[TargetIndex])
+      SongrequestQueue.splice(TargetIndex, 1)
+
+      updateQueue("main")
+      updateQueue("songrequest")
+    }
+
+  }
+})
+
+document.getElementById("SRSplitQueue").addEventListener('change', function(){
+  if (this.checked === true){
+    document.getElementById('SRQueue').style.display = 'block'
+  } else {
+    document.getElementById('SRQueue').style.display = 'none'
+  }
+})
+
 document.getElementById("ToggleSongrequest").addEventListener("click", () => {
   if (SongrequestToggle == true) {
     SongrequestToggle = false
@@ -1486,7 +1607,7 @@ function handleWrongRequest(message) {
       break
     }
   }
-  updateQueue()
+  updateQueue("main")
 }
 
 function requestPathway(requestUser, requestId, isMod) {
@@ -1545,8 +1666,18 @@ function processRequest(jsonData) {
     return
   }
 
-  let requestedVideo = new XMLHttpRequest()
   // Check if videoid is valid
+  if (video_data[requestId] !== undefined){
+    if (document.getElementById("SRSplitQueue").checked === true){
+      AddVideo(requestId, 'songrequest')
+    } else {
+      AddVideo(requestId, 'main')
+    }
+    sendMessage("Added " + video_data[requestId].title)
+    return
+  }
+
+  let requestedVideo = new XMLHttpRequest()
   requestedVideo.onreadystatechange = function () {
     if (requestedVideo.readyState == 4) {
       if (JSON.parse(requestedVideo.response).error == "404 Not Found") {
@@ -1589,7 +1720,11 @@ function processRequest(jsonData) {
             }
             video_data[processedData.id] = processedData
           }
-          AddVideo(processedData.id)
+          if (document.getElementById("SRSplitQueue").checked === true){
+            AddVideo(requestId, 'songrequest')
+          } else {
+            AddVideo(requestId, 'main')
+          }
           sendMessage("Added " + processedData.title)
         }
       }
@@ -1737,19 +1872,34 @@ function convertNumber(raw_number) {
 }
 
 function replaceAt(string, index, value) {
-  // replace index to a new value
+  // replace index with a new value
   return string.substring(0, index) + value + string.substring(index + 1)
 }
 
-function updateQueue() {
-  document.getElementById('queue').innerHTML = '<h1>Queue:</h1>'
+function updateQueue(queueType) {
+  if (queueType === 'main'){
+    let QueueElement = document.getElementById('queue')
+    QueueElement.innerHTML = '<h1>Queue:</h1>'
+  
+    for (let i = 0; i < queue.length; i++) {
+      let s = document.createElement('section')
+      let p = document.createElement('p')
+      p.innerText = queue[i].title
+      s.appendChild(p)
+      QueueElement.appendChild(s)
+    }
+  } else {
+    let QueueElement = document.getElementById('SRQueue')
+    QueueElement.innerHTML = '<h1>SR Queue:</h1>'
+  
+    for (let i = 0; i < SongrequestQueue.length; i++) {
+      let s = document.createElement('section')
+      let p = document.createElement('p')
+      p.innerText = SongrequestQueue[i].title
+      s.appendChild(p)
+      QueueElement.appendChild(s)
+    }
 
-  for (let i = 0; i < queue.length; i++) {
-    let s = document.createElement('section')
-    let p = document.createElement('p')
-    p.innerText = queue[i].title
-    s.appendChild(p)
-    document.getElementById('queue').appendChild(s)
   }
 
 }
