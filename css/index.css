@@ -146,7 +146,8 @@ body {
 
 #EditVolumeWindow section {
     position: relative;
-    width: 35vmin;
+    width: 75vw;
+    max-width: 16rem;
     padding: 2rem 0;
     background: #3a3a3a;
     display: flex;
@@ -199,7 +200,8 @@ body {
 
 #NotesWindow section {
     position: relative;
-    width: 35vmin;
+    width: 75vw;
+    max-width: 30rem;
     padding: 2rem 0;
     background: #3a3a3a;
     display: flex;
