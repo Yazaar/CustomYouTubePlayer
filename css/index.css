@@ -396,7 +396,8 @@ body {
 }
 
 #StatusMessage {
-    margin: 0 0 10px 10px;
+    margin: 0 0 0 10px;
+    padding-bottom: 10px;
     color: #b6b6b6;
     font-size: 1.3rem;
 }
