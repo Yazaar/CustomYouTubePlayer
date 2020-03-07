@@ -19,6 +19,8 @@ from pypresence import Presence
 from time import time, sleep
 from threading import Thread
 
+print('host >> localhost:80')
+
 app = Flask(__name__)
 
 sio = SocketIO(app)
@@ -42,26 +44,28 @@ def t1():
     global ping, sinceUpdate
     while displayData['videoId'] == '':
         sleep(1)
+    currentTime = time()
     while True:
-        if time()-5 > ping and time() > sinceUpdate:
-            ping = time()
-            sinceUpdate = time() + 15
-            RPC.update(start=time() - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y')
+        if currentTime-5 > ping and currentTime > sinceUpdate:
+            ping = currentTime
+            sinceUpdate = currentTime + 15
+            RPC.update(start=currentTime - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y')
         sleep(1)
 
 @sio.on('ScriptTalk')
 def newData(data):
     global sinceUpdate, ping
-    displayData['duration'] = int(data['data']['currentTime'])
     videoId = data['data']['videoId']
+    currentDuration = time() - int(data['data']['currentTime'])
     ping = time()
-
-    if time() > sinceUpdate and videoId != displayData['videoId']:
+    timeDelta = currentDuration - displayData['duration']
+    if time() > sinceUpdate and (videoId != displayData['videoId'] or timeDelta > 2 or -2 > timeDelta):
+        displayData['duration'] = currentDuration
         displayData['channel'] = data['data']['channel']
         displayData['title'] = data['data']['title']
         displayData['videoId'] = data['data']['videoId']
         sinceUpdate = time() + 15
-        RPC.update(start=time() - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y')
+        RPC.update(start=displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y')
 
 Thread(target=t1, daemon=True).start()
 sio.run(app, port=80)</code></pre>
