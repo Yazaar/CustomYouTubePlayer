@@ -44,19 +44,19 @@ def t1():
     global ping, sinceUpdate
     while displayData['videoId'] == '':
         sleep(1)
-    currentTime = time()
     while True:
+        currentTime = time()
         if currentTime-5 > ping and currentTime > sinceUpdate:
             ping = currentTime
-            sinceUpdate = currentTime + 15
-            RPC.update(start=currentTime - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y')
+            sinceUpdate = ping + 15
+            RPC.update(start=ping - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y')
         sleep(1)
 
 @sio.on('ScriptTalk')
 def newData(data):
     global sinceUpdate, ping
     videoId = data['data']['videoId']
-    currentDuration = time() - int(data['data']['currentTime'])
+    currentDuration = int(data['data']['currentTime'])
     ping = time()
     timeDelta = currentDuration - displayData['duration']
     if time() > sinceUpdate and (videoId != displayData['videoId'] or timeDelta > 2 or -2 > timeDelta):
@@ -65,7 +65,7 @@ def newData(data):
         displayData['title'] = data['data']['title']
         displayData['videoId'] = data['data']['videoId']
         sinceUpdate = time() + 15
-        RPC.update(start=displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y')
+        RPC.update(start=ping - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y')
 
 Thread(target=t1, daemon=True).start()
 sio.run(app, port=80)</code></pre>
