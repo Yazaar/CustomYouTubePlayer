@@ -309,7 +309,7 @@ function RunSearch() {
 
 
 window.addEventListener("keypress", (e) => {
-  if (e.path[0] == document.getElementById("SearchInput") && e.key == "Enter") {
+  if (e.target == document.getElementById("SearchInput") && e.key == "Enter") {
     RunSearch()
   }
 })
