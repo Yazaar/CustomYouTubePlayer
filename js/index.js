@@ -70,7 +70,8 @@ let musicLinkData = {
   YTthumbnail: ''
 }
 let musicLinkLoop = false
-// Socket variables
+let musicLinkLatestValid = '';
+// MusicLink variables
 
 var tag = document.createElement('script');
 
@@ -1233,7 +1234,7 @@ document.getElementById("HideShowSocketSettings").addEventListener("click", () =
 
 // CODE FOR MusicLink START
 
-function updateSocket() {
+function updateMusicLink() {
   if (playerReady !== true) {
     return
   }
@@ -1276,7 +1277,6 @@ function updateSocket() {
 
   // if changes has been done, forward the data to socket connection
   if (noChanges === false) {
-      console.log('update')
       musicLink.emit('overlayUpdate', musicLinkData)
   }
 }
@@ -1299,7 +1299,7 @@ document.getElementById('MusicLinkButton').addEventListener('click', () => {
     musicLink.on('connect', function(){
       document.getElementById('MusicLinkButton').innerText = 'Connected'
       if (musicLinkLoop === false) {
-        musicLinkLoop = setInterval(updateSocket, 1000)
+        musicLinkLoop = setInterval(updateMusicLink, 1000)
       }
     })
 
@@ -1352,6 +1352,15 @@ document.getElementById("HideShowMusicLinkSettings").addEventListener("click", (
     document.getElementById("MusicLinkSettingsData").style.display = "block"
     document.getElementById("HideShowMusicLinkSettings").innerHTML = "Hide settings"
   }
+})
+
+document.getElementById('MusicLinkRoomId').addEventListener('input', function() {
+    let newValue = this.value
+    if (/^[a-zA-Z1-9]*$/.test(newValue)) {
+        musicLinkLatestValid = newValue
+    } else {
+        this.value = musicLinkLatestValid
+    }
 })
 
 // CODE FOR MusicLink END
