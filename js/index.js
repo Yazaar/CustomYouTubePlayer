@@ -58,7 +58,19 @@ let socketData = {
 let socketLoop = false
 // Socket variables
 
-
+// MusicLink variables
+let musicLinkToggle = false
+let musicLinkConnecting = false
+let musicLink
+let musicLinkData = {
+  author: '',
+  title: '',
+  currentTime: 0,
+  totalTime: 0,
+  YTthumbnail: ''
+}
+let musicLinkLoop = false
+// Socket variables
 
 var tag = document.createElement('script');
 
@@ -1218,6 +1230,131 @@ document.getElementById("HideShowSocketSettings").addEventListener("click", () =
   }
 })
 // CODE FOR SOCKET END
+
+// CODE FOR MusicLink START
+
+function updateSocket() {
+  if (playerReady !== true) {
+    return
+  }
+  let noChanges = true
+
+  // check if title has changed
+  if (CurrentlyPlaying.title !== musicLinkData.title) {
+    musicLinkData.title = CurrentlyPlaying.title
+    noChanges = false
+  }
+  
+  let temp = player.getCurrentTime()
+  if (isFinite(temp) === false) {
+    temp = 0
+  }
+  if (temp !== musicLinkData.currentTime) {
+    musicLinkData.currentTime = temp
+    noChanges = false
+  }
+  
+  temp = player.getDuration()
+  if (isFinite(temp) === false) {
+    temp = 0
+  }
+  if (temp !== musicLinkData.totalTime) {
+    musicLinkData.totalTime = temp
+    noChanges = false
+  }
+  
+  // check if channel has changed
+  if (CurrentlyPlaying.channel !== musicLinkData.author) {
+    musicLinkData.author = CurrentlyPlaying.channel
+    noChanges = false
+  }
+
+  if (CurrentlyPlaying.id !== musicLinkData.YTthumbnail){
+      musicLinkData.YTthumbnail = CurrentlyPlaying.id
+      noChanges = false
+  }
+
+  // if changes has been done, forward the data to socket connection
+  if (noChanges === false) {
+      console.log('update')
+      musicLink.emit('overlayUpdate', musicLinkData)
+  }
+}
+
+document.getElementById('MusicLinkButton').addEventListener('click', () => {
+  if(musicLinkConnecting === false) {
+    let roomId = document.getElementById('MusicLinkRoomId').value
+    
+    if (roomId === '') {
+      return
+    }
+
+    musicLinkData.roomId = roomId
+    
+    musicLinkConnecting = true
+    document.getElementById('MusicLinkClickToCloseTip').style.display = 'block'
+    document.getElementById('MusicLinkButton').innerText = 'Connecting'
+
+    musicLink = io('https://yazaar.herokuapp.com', {transports: ['websocket']})
+    musicLink.on('connect', function(){
+      document.getElementById('MusicLinkButton').innerText = 'Connected'
+      if (musicLinkLoop === false) {
+        musicLinkLoop = setInterval(updateSocket, 1000)
+      }
+    })
+
+    musicLink.on('connect_error', function(){
+      document.getElementById('SocketButton').innerText = 'Host unreachable'
+    })
+    
+    musicLink.on('reconnect', function(e){
+      document.getElementById('SocketButton').innerText = 'Connected'
+    })
+
+    musicLink.on('disconnect', function(){
+    })
+
+    musicLink.on('reconnect_attempt', () => {
+        musicLink.io.opts.transports = ['polling', 'websocket']
+    })
+
+    musicLink.on('error', function(e){
+        console.log(e)
+    })
+  } else {
+    clearInterval(musicLinkLoop)
+    musicLinkLoop = false
+    musicLink.close()
+    musicLinkConnecting = false
+    document.getElementById('MusicLinkClickToCloseTip').style.display = ''
+    document.getElementById('MusicLinkButton').innerText = 'Connect'
+  }
+})
+
+document.getElementById("ToggleMusicLink").addEventListener("click", () => {
+  if (musicLinkToggle == true) {
+    musicLinkToggle = false
+    document.getElementById("MusicLinkSettingsData").style.display = "none"
+    document.getElementById("HideShowMusicLinkSettings").style.display = "none"
+    document.getElementById("HideShowMusicLinkSettings").innerHTML = "Hide settings"
+  } else {
+    musicLinkToggle = true
+    document.getElementById("MusicLinkSettingsData").style.display = "block"
+    document.getElementById("HideShowMusicLinkSettings").style.display = "inline-flex"
+  }
+})
+
+document.getElementById("HideShowMusicLinkSettings").addEventListener("click", () => {
+  if (document.getElementById("MusicLinkSettingsData").style.display == "block") {
+    document.getElementById("MusicLinkSettingsData").style.display = "none"
+    document.getElementById("HideShowMusicLinkSettings").innerHTML = "Show settings"
+  } else {
+    document.getElementById("MusicLinkSettingsData").style.display = "block"
+    document.getElementById("HideShowMusicLinkSettings").innerHTML = "Hide settings"
+  }
+})
+
+// CODE FOR MusicLink END
 
 // CODE FOR SONGREQUEST START
 
