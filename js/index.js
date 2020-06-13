@@ -1283,13 +1283,12 @@ function updateMusicLink() {
 
 document.getElementById('MusicLinkButton').addEventListener('click', () => {
   if(musicLinkConnecting === false) {
-    let roomId = document.getElementById('MusicLinkRoomId').value
     
-    if (roomId === '') {
+    if (musicLinkLatestValid === '') {
       return
     }
 
-    musicLinkData.roomId = roomId
+    musicLinkData.roomId = musicLinkLatestValid
     
     musicLinkConnecting = true
     document.getElementById('MusicLinkClickToCloseTip').style.display = 'block'
@@ -1355,12 +1354,20 @@ document.getElementById("HideShowMusicLinkSettings").addEventListener("click", (
 })
 
 document.getElementById('MusicLinkRoomId').addEventListener('input', function() {
-    let newValue = this.value
-    if (/^[a-zA-Z1-9]*$/.test(newValue)) {
-        musicLinkLatestValid = newValue
+  let newValue = this.value
+  if (/^[a-zA-Z1-9]*$/.test(newValue)) {
+      musicLinkLatestValid = newValue
+      let musicLinkLink = document.querySelector('#MusicLinkLink a')
+      if (newValue === '') {
+        document.getElementById('MusicLinkLink').style.display = 'none';
+      } else {
+        document.getElementById('MusicLinkLink').style.display = '';
+        musicLinkLink.innerText = 'https://yazaar.herokuapp.com/MusicLink/overlay/' + newValue
+        musicLinkLink.href = 'https://yazaar.herokuapp.com/MusicLink/overlay/' + newValue
+       }
     } else {
-        this.value = musicLinkLatestValid
-    }
+      this.value = musicLinkLatestValid
+  }
 })
 
 // CODE FOR MusicLink END
