@@ -1355,7 +1355,7 @@ document.getElementById("HideShowMusicLinkSettings").addEventListener("click", (
 
 document.getElementById('MusicLinkRoomId').addEventListener('input', function() {
   let newValue = this.value
-  if (/^[a-zA-Z1-9]*$/.test(newValue)) {
+  if (/^[a-zA-Z0-9]*$/.test(newValue)) {
       musicLinkLatestValid = newValue
       let musicLinkLink = document.querySelector('#MusicLinkLink a')
       if (newValue === '') {
