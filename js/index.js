@@ -187,6 +187,9 @@ function RunSearch() {
         if (data === undefined || data.constructor !== Array) {
           loading = false
           morePages = false
+          let noMorePagesElement = document.createElement('h1')
+          noMorePagesElement.innerText = 'Finished loading'
+          document.getElementById('SearchResults').appendChild(noMorePagesElement)
           alert("Invalid API Key, please consider swapping key")
           document.getElementById("SwapKey").click()
           return
@@ -233,6 +236,9 @@ function RunSearch() {
         if (data === undefined || data.constructor !== Array) {
           loading = false
           morePages = false
+          let noMorePagesElement = document.createElement('h1')
+          noMorePagesElement.innerText = 'Finished loading'
+          document.getElementById('SearchResults').appendChild(noMorePagesElement)
           alert("Invalid API Key, please consider swapping key")
           document.getElementById("SwapKey").click()
           return
@@ -307,6 +313,9 @@ function RunSearch() {
             InnerHTMLData = '<section onclick="AddVideo(this)" data-videoid="' + processedData.id + '">' + '<img src="' + processedData.thumbnail + '">' + "<span>" + "<h1>" + processedData.title + "</h1>" + '<p class="VideoItem"><i class="fas fa-clock"></i>' + processedData.duration + "</p>" + '<p class="VideoItem"><i class="fas fa-eye"></i>' + processedData.views + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-up"></i>' + processedData.likes + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-down"></i>' + processedData.dislikes + "</p>" + "<p>" + processedData.channel + "</p>" + "</span>" + "</section>"
             document.getElementById("SearchResults").innerHTML = InnerHTMLData
             morePages = false
+            let noMorePagesElement = document.createElement('h1')
+            noMorePagesElement.innerText = 'Finished loading'
+            document.getElementById('SearchResults').appendChild(noMorePagesElement)
             loading = false
           }
         }
@@ -352,6 +361,9 @@ window.addEventListener("scroll", () => {
         data = JSON.parse(xml.response).items
         if (JSON.parse(xml.response).nextPageToken === undefined) {
           morePages = false
+          let noMorePagesElement = document.createElement('h1')
+          noMorePagesElement.innerText = 'Finished loading'
+          document.getElementById('SearchResults').appendChild(noMorePagesElement)
         } else {
           token = JSON.parse(xml.response).nextPageToken
         }
@@ -388,6 +400,9 @@ window.addEventListener("scroll", () => {
         data = JSON.parse(xml.response).items
         if (JSON.parse(xml.response).nextPageToken === undefined) {
           morePages = false
+          let noMorePagesElement = document.createElement('h1')
+          noMorePagesElement.innerText = 'Finished loading'
+          document.getElementById('SearchResults').appendChild(noMorePagesElement)
         } else {
           token = JSON.parse(xml.response).nextPageToken
         }
@@ -1937,6 +1952,11 @@ function newRequestFromIDs(xml) {
       InnerHTMLData += '<section onclick="AddVideo(this)" data-videoid="' + video_data[video.id].id + '">' + '<img src="' + video_data[video.id].thumbnail + '">' + "<span>" + "<h1>" + video_data[video.id].title + "</h1>" + '<p class="VideoItem"><i class="fas fa-clock"></i>' + video_data[video.id].duration + "</p>" + '<p class="VideoItem"><i class="fas fa-eye"></i>' + video_data[video.id].views + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-up"></i>' + video_data[video.id].likes + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-down"></i>' + video_data[video.id].dislikes + "</p>" + "<p>" + video_data[video.id].channel + "</p>" + "</span>" + "</section>"
     }
     document.getElementById("SearchResults").innerHTML = InnerHTMLData
+    if (morePages === false) {
+      let noMorePagesElement = document.createElement('h1')
+      noMorePagesElement.innerText = 'Finished loading'
+      document.getElementById('SearchResults').appendChild(noMorePagesElement)
+    }
     loading = false
   }
 }
@@ -1960,6 +1980,11 @@ function requestFromIDs(xml) {
       InnerHTMLData += '<section onclick="AddVideo(this)" data-videoid="' + video_data[video.id].id + '">' + '<img src="' + video_data[video.id].thumbnail + '">' + "<span>" + "<h1>" + video_data[video.id].title + "</h1>" + '<p class="VideoItem"><i class="fas fa-clock"></i>' + video_data[video.id].duration + "</p>" + '<p class="VideoItem"><i class="fas fa-eye"></i>' + video_data[video.id].views + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-up"></i>' + video_data[video.id].likes + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-down"></i>' + video_data[video.id].dislikes + "</p>" + "<p>" + video_data[video.id].channel + "</p>" + "</span>" + "</section>"
     }
     document.getElementById("SearchResults").innerHTML += InnerHTMLData
+    if (morePages === false) {
+      let noMorePagesElement = document.createElement('h1')
+      noMorePagesElement.innerText = 'Finished loading'
+      document.getElementById('SearchResults').appendChild(noMorePagesElement)
+    }
     loading = false
   }
 }
