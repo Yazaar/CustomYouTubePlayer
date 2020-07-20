@@ -385,7 +385,6 @@ window.addEventListener("keypress", (e) => {
   }
 })
 
-
 window.addEventListener("scroll", () => {
   if (loading == true) {
     return
@@ -482,9 +481,11 @@ window.addEventListener("scroll", () => {
     // API Call 1 (List videos)
     xml.onreadystatechange = function () {
       if (xml.readyState == 4) {
-        video_data = {}
         data = JSON.parse(xml.response).items
         token = JSON.parse(xml.response).nextPageToken
+        if (token === undefined) {
+          morePages = false
+        }
         
         let ids = ""
         
@@ -849,6 +850,10 @@ function AddVideo(data_tag, queueType='main') {
     video_id = new String(data_tag.getAttribute("data-videoid"))
   } else {
     video_id = data_tag
+  }
+
+  if (video_data[video_id] === undefined) {
+    return
   }
 
   if (document.getElementById("player").nodeName == "DIV") {
