@@ -11,7 +11,7 @@ let LockStatus = false
 let CurrentlyPlaying
 let SearchMethod
 let CurrentSearchMethod
-let listId
+let query
 let token
 let morePages
 let key = "AIzaSyBSyUYZf-2UqLAnBYJGDzd-fQZ8hps3-40"
@@ -173,7 +173,12 @@ function RunSearch() {
   morePages = true
 
   SearchInput = document.getElementById("SearchInput").value
-  if (SearchInput != "" && SearchMethod == "video") {
+  if (SearchInput == "") {
+    loading = false
+    morePages = false
+    return
+  }
+  if (SearchMethod == "video") {
     let xml = new XMLHttpRequest()
     // API Call 1 (List videos)
     xml.onreadystatechange = function () {
@@ -217,7 +222,7 @@ function RunSearch() {
     xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&key=" + key + "&type=video&order=relevance&maxResults=50&q=" + encodeURI(SearchInput), true)
     xml.send()
 
-  } else if (SearchInput != "" && SearchMethod == "playlist") {
+  } else if (SearchMethod == "playlist") {
     let xml = new XMLHttpRequest()
     // API call 1 (List videos)
     xml.onreadystatechange = function () {
@@ -263,11 +268,11 @@ function RunSearch() {
         xml2.send()
       }
     }
-    listId = new URLSearchParams(SearchInput.split("?")[1])
+    query = new URLSearchParams(SearchInput.split("?")[1])
 
-    xml.open('get', 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=' + key + '&maxResults=50&playlistId=' + listId.get("list"), true)
+    xml.open('get', 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=' + key + '&maxResults=50&playquery=' + query.get("list"), true)
     xml.send()
-  } else if (SearchInput != "" && SearchMethod == "specific") {
+  } else if (SearchMethod == "specific") {
     let xml = new XMLHttpRequest()
     // Check if video id is valid
     xml.onreadystatechange = function () {
@@ -326,6 +331,50 @@ function RunSearch() {
     let requestId = SearchInput.match(/\?[^v]*v=([^&]+)/)[1]
     xml.open("get", "https://noembed.com/embed?url=https://www.youtube.com/watch?v=" + requestId, true)
     xml.send()
+  } else if (SearchMethod == "channel") {
+    let xml = new XMLHttpRequest()
+    // API Call 1 (List videos)
+    xml.onreadystatechange = function () {
+      if (xml.readyState == 4) {
+        video_data = {}
+        data = JSON.parse(xml.response).items
+        token = JSON.parse(xml.response).nextPageToken
+
+        let ids = ""
+
+        if (data === undefined || data.constructor !== Array) {
+          loading = false
+          morePages = false
+          let noMorePagesElement = document.createElement('h1')
+          noMorePagesElement.innerText = 'Finished loading'
+          document.getElementById('SearchResults').appendChild(noMorePagesElement)
+          alert("Invalid API Key, please consider swapping key")
+          document.getElementById("SwapKey").click()
+          return
+        }
+
+        for (let i in data) {
+          if (ids === "") {
+            ids += data[i].id.videoId
+          } else {
+            ids += "," + data[i].id.videoId
+          }
+        }
+
+        let xml2 = new XMLHttpRequest()
+        // API Call 2 (Video data from id:s)
+        xml2.onreadystatechange = function() {
+          newRequestFromIDs(xml2)
+        }
+        xml2.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
+        xml2.send()
+      }
+    }
+
+    CurrentSearchMethod = "channel"
+    query = SearchInput.match(/youtube.com\/channel\/([^\/\?#]+)/)[1]
+    xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=" + query + "&maxResults=50&order=date&key=" + key, true)
+    xml.send()
   }
 }
 
@@ -350,10 +399,10 @@ window.addEventListener("scroll", () => {
   if (morePages == false) {
     return
   }
-
+  
   loading = true
-
-  if (SearchMethod == "playlist") {
+  
+  if (CurrentSearchMethod == "playlist") {
     let xml = new XMLHttpRequest()
     // API Call 1 (List videos)
     xml.onreadystatechange = function () {
@@ -367,9 +416,9 @@ window.addEventListener("scroll", () => {
         } else {
           token = JSON.parse(xml.response).nextPageToken
         }
-
+        
         let ids = ""
-
+        
         for (i of data) {
           if (ids === "") {
             ids += i.snippet.resourceId.videoId
@@ -377,7 +426,7 @@ window.addEventListener("scroll", () => {
             ids += "," + i.snippet.resourceId.videoId
           }
         }
-
+        
         let xml2 = new XMLHttpRequest()
         // API Call 2 (Video data from id:s)
         xml2.onreadystatechange = () => {
@@ -387,12 +436,12 @@ window.addEventListener("scroll", () => {
         xml2.send()
       }
     }
-
-    xml.open("get", "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=" + key + "&maxResults=50&playlistId=" + listId.get("list") + "&pageToken=" + token, true)
+    
+    xml.open("get", "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=" + key + "&maxResults=50&playquery=" + query.get("list") + "&pageToken=" + token, true)
     xml.send()
-
-
-  } else if (SearchMethod == "video") {
+    
+    
+  } else if (CurrentSearchMethod == "video") {
     let xml = new XMLHttpRequest()
     // API Call 1 (List videos)
     xml.onreadystatechange = function () {
@@ -406,9 +455,9 @@ window.addEventListener("scroll", () => {
         } else {
           token = JSON.parse(xml.response).nextPageToken
         }
-
+        
         let ids = ""
-
+        
         for (let video of data) {
           if (ids === "") {
             ids += video.id.videoId
@@ -416,7 +465,7 @@ window.addEventListener("scroll", () => {
             ids += "," + video.id.videoId
           }
         }
-
+        
         let xml2 = new XMLHttpRequest()
         // API Call 2 (Video data from id:s)
         xml2.onreadystatechange = () => {
@@ -428,6 +477,47 @@ window.addEventListener("scroll", () => {
     }
     xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&key=" + key + "&type=video&order=relevance&maxResults=50&q=" + encodeURI(SearchInput) + "&pageToken=" + token, true)
     xml.send()
+  } else if (CurrentSearchMethod == "channel") {
+    let xml = new XMLHttpRequest()
+    // API Call 1 (List videos)
+    xml.onreadystatechange = function () {
+      if (xml.readyState == 4) {
+        video_data = {}
+        data = JSON.parse(xml.response).items
+        token = JSON.parse(xml.response).nextPageToken
+        
+        let ids = ""
+        
+        if (data === undefined || data.constructor !== Array) {
+          loading = false
+          morePages = false
+          let noMorePagesElement = document.createElement('h1')
+          noMorePagesElement.innerText = 'Finished loading'
+          document.getElementById('SearchResults').appendChild(noMorePagesElement)
+          alert("Invalid API Key, please consider swapping key")
+          document.getElementById("SwapKey").click()
+          return
+        }
+        
+        for (let i in data) {
+          if (ids === "") {
+            ids += data[i].id.videoId
+          } else {
+            ids += "," + data[i].id.videoId
+          }
+        }
+        
+        let xml2 = new XMLHttpRequest()
+        // API Call 2 (Video data from id:s)
+        xml2.onreadystatechange = function() {
+          requestFromIDs(xml2)
+        }
+        xml2.open("get", "https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=" + ids + "&key=" + key, true)
+        xml2.send()
+      }
+    }
+    xml.open("get", "https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=" + query + "&maxResults=50&pageToken=" + token + "&order=date&key=" + key, true)
+    xml.send()
   }
 })
 
@@ -435,8 +525,8 @@ window.addEventListener("scroll", () => {
 document.getElementById("skip").addEventListener("click", () => {
   if (queue.length > 0) {
     let index = 0
-
-
+    
+    
     player.loadVideoById(queue[index].id, 0)
 
     CurrentlyPlaying = queue[index]
@@ -726,6 +816,12 @@ function SearchInputChange(InputValue) {
   } else if (/\?[^v]*v=[^&]+/.test(InputValue) && /youtube.com\/watch/.test(InputValue)) {
     document.getElementById("Search").innerHTML = "Find Video"
     SearchMethod = "specific"
+  } else if (/\?[^v]*v=[^&]+/.test(InputValue) && /youtube.com\/watch/.test(InputValue)) {
+    document.getElementById("Search").innerHTML = "Find Video"
+    SearchMethod = "specific"
+  } else if (/youtube.com\/channel\/[^\/]+/.test(InputValue)) {
+    document.getElementById("Search").innerHTML = "Find User"
+    SearchMethod = "channel"
   } else {
     document.getElementById("Search").innerHTML = "Search Video"
     SearchMethod = "video"
