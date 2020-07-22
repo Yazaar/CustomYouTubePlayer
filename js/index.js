@@ -192,9 +192,6 @@ function RunSearch() {
         if (data === undefined || data.constructor !== Array) {
           loading = false
           morePages = false
-          let noMorePagesElement = document.createElement('h1')
-          noMorePagesElement.innerText = 'Finished loading'
-          document.getElementById('SearchResults').appendChild(noMorePagesElement)
           alert("Invalid API Key, please consider swapping key")
           document.getElementById("SwapKey").click()
           return
@@ -241,9 +238,6 @@ function RunSearch() {
         if (data === undefined || data.constructor !== Array) {
           loading = false
           morePages = false
-          let noMorePagesElement = document.createElement('h1')
-          noMorePagesElement.innerText = 'Finished loading'
-          document.getElementById('SearchResults').appendChild(noMorePagesElement)
           alert("Invalid API Key, please consider swapping key")
           document.getElementById("SwapKey").click()
           return
@@ -270,7 +264,7 @@ function RunSearch() {
     }
     query = new URLSearchParams(SearchInput.split("?")[1])
 
-    xml.open('get', 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=' + key + '&maxResults=50&playquery=' + query.get("list"), true)
+    xml.open('get', 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=' + key + '&maxResults=50&playlistId=' + query.get("list"), true)
     xml.send()
   } else if (SearchMethod == "specific") {
     let xml = new XMLHttpRequest()
@@ -345,9 +339,6 @@ function RunSearch() {
         if (data === undefined || data.constructor !== Array) {
           loading = false
           morePages = false
-          let noMorePagesElement = document.createElement('h1')
-          noMorePagesElement.innerText = 'Finished loading'
-          document.getElementById('SearchResults').appendChild(noMorePagesElement)
           alert("Invalid API Key, please consider swapping key")
           document.getElementById("SwapKey").click()
           return
@@ -492,9 +483,6 @@ window.addEventListener("scroll", () => {
         if (data === undefined || data.constructor !== Array) {
           loading = false
           morePages = false
-          let noMorePagesElement = document.createElement('h1')
-          noMorePagesElement.innerText = 'Finished loading'
-          document.getElementById('SearchResults').appendChild(noMorePagesElement)
           alert("Invalid API Key, please consider swapping key")
           document.getElementById("SwapKey").click()
           return
