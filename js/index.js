@@ -228,6 +228,7 @@ function RunSearch() {
         data = JSON.parse(xml.response).items
         if (!JSON.parse(xml.response).nextPageToken) {
           morePages = false
+          token = undefined
         } else {
           token = JSON.parse(xml.response).nextPageToken
           morePages = true
@@ -309,6 +310,7 @@ function RunSearch() {
               }
               video_data[processedData.id] = processedData
             }
+            console.log('a')
             InnerHTMLData = '<section onclick="AddVideo(this)" data-videoid="' + processedData.id + '">' + '<img src="' + processedData.thumbnail + '">' + "<span>" + "<h1>" + processedData.title + "</h1>" + '<p class="VideoItem"><i class="fas fa-clock"></i>' + processedData.duration + "</p>" + '<p class="VideoItem"><i class="fas fa-eye"></i>' + processedData.views + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-up"></i>' + processedData.likes + "</p>" + '<p class="VideoItem"><i class="fas fa-thumbs-down"></i>' + processedData.dislikes + "</p>" + "<p>" + processedData.channel + "</p>" + "</span>" + "</section>"
             document.getElementById("SearchResults").innerHTML = InnerHTMLData
             morePages = false
@@ -400,9 +402,7 @@ window.addEventListener("scroll", () => {
         data = JSON.parse(xml.response).items
         if (JSON.parse(xml.response).nextPageToken === undefined) {
           morePages = false
-          let noMorePagesElement = document.createElement('h1')
-          noMorePagesElement.innerText = 'Finished loading'
-          document.getElementById('SearchResults').appendChild(noMorePagesElement)
+          token = undefined
         } else {
           token = JSON.parse(xml.response).nextPageToken
         }
@@ -427,9 +427,8 @@ window.addEventListener("scroll", () => {
       }
     }
     
-    xml.open("get", "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=" + key + "&maxResults=50&playquery=" + query.get("list") + "&pageToken=" + token, true)
+    xml.open("get", "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&key=" + key + "&maxResults=50&playlistId=" + query.get("list") + "&pageToken=" + token, true)
     xml.send()
-    
     
   } else if (CurrentSearchMethod == "video") {
     let xml = new XMLHttpRequest()
@@ -439,9 +438,7 @@ window.addEventListener("scroll", () => {
         data = JSON.parse(xml.response).items
         if (JSON.parse(xml.response).nextPageToken === undefined) {
           morePages = false
-          let noMorePagesElement = document.createElement('h1')
-          noMorePagesElement.innerText = 'Finished loading'
-          document.getElementById('SearchResults').appendChild(noMorePagesElement)
+          token = undefined
         } else {
           token = JSON.parse(xml.response).nextPageToken
         }
@@ -2042,6 +2039,7 @@ function newRequestFromIDs(xml) {
     }
     document.getElementById("SearchResults").innerHTML = InnerHTMLData
     if (morePages === false) {
+      console.log('d')
       let noMorePagesElement = document.createElement('h1')
       noMorePagesElement.innerText = 'Finished loading'
       document.getElementById('SearchResults').appendChild(noMorePagesElement)
@@ -2070,6 +2068,7 @@ function requestFromIDs(xml) {
     }
     document.getElementById("SearchResults").innerHTML += InnerHTMLData
     if (morePages === false) {
+      console.log('e')
       let noMorePagesElement = document.createElement('h1')
       noMorePagesElement.innerText = 'Finished loading'
       document.getElementById('SearchResults').appendChild(noMorePagesElement)
