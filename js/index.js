@@ -67,7 +67,14 @@ let musicLinkData = {
   title: '',
   currentTime: 0,
   totalTime: 0,
-  YTthumbnail: ''
+  YTthumbnail: '',
+  timePerSecond: 1,
+  paused: true
+}
+
+let musicLinkDataPrivate = {
+  lastCheck: null,
+  lastValue: null
 }
 let musicLinkLoop = false
 let musicLinkLatestValid = '';
@@ -1341,7 +1348,6 @@ function updateMusicLink() {
   }
   let noChanges = true
 
-  // check if title has changed
   if (CurrentlyPlaying.title !== musicLinkData.title) {
     musicLinkData.title = CurrentlyPlaying.title
     noChanges = false
@@ -1351,10 +1357,26 @@ function updateMusicLink() {
   if (isFinite(temp) === false) {
     temp = 0
   }
-  if (temp !== musicLinkData.currentTime) {
-    musicLinkData.currentTime = temp
-    noChanges = false
+  musicLinkData.currentTime = temp
+
+  let estimate
+  if (musicLinkDataPrivate.lastCheck === null || musicLinkDataPrivate.lastValue === null) {
+    estimate = Infinity
+  } else {
+    let realTimeDelta = musicLinkData.currentTime - musicLinkDataPrivate.lastValue
+    let estimatedTimeDelta = (new Date() - musicLinkDataPrivate.lastCheck) / 1000
+    estimate = realTimeDelta - estimatedTimeDelta
+    if (estimate < 0) {
+      estimate *= -1
+    }
   }
+
+  if (estimate > 2) {
+    noChanges = false
+    musicLinkDataPrivate.lastValue = musicLinkData.currentTime
+    musicLinkDataPrivate.lastCheck = new Date()
+  }
+
   
   temp = player.getDuration()
   if (isFinite(temp) === false) {
@@ -1365,7 +1387,6 @@ function updateMusicLink() {
     noChanges = false
   }
   
-  // check if channel has changed
   if (CurrentlyPlaying.channel !== musicLinkData.author) {
     musicLinkData.author = CurrentlyPlaying.channel
     noChanges = false
@@ -1376,7 +1397,12 @@ function updateMusicLink() {
       noChanges = false
   }
 
-  // if changes has been done, forward the data to socket connection
+  temp = player.getPlayerState() === YT.PlayerState.PAUSED
+  if (temp !== musicLinkData.paused) {
+    musicLinkData.paused = temp
+    noChanges = false
+  }
+
   if (noChanges === false) {
       musicLink.emit('overlayUpdate', musicLinkData)
   }
