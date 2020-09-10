@@ -49,7 +49,7 @@ def t1():
         if currentTime-5 > ping and currentTime > sinceUpdate:
             ping = currentTime
             sinceUpdate = ping + 15
-            RPC.update(start=ping - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y')
+            RPC.update(start=ping - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y', large_text='Playing YouTube video', small_text='Made by Yazaar')
         sleep(1)
 
 @sio.on('ScriptTalk')
@@ -65,7 +65,7 @@ def newData(data):
         displayData['title'] = data['data']['title']
         displayData['videoId'] = data['data']['videoId']
         sinceUpdate = time() + 15
-        RPC.update(start=ping - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y')
+        RPC.update(start=ping - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y', large_text='Playing YouTube video', small_text='Made by Yazaar')
 
 Thread(target=t1, daemon=True).start()
 sio.run(app, port=80)</code></pre>
