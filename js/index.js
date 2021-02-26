@@ -196,9 +196,10 @@ function RunSearch() {
 
         let ids = ""
 
+        morePages = token !== undefined
+
         if (data === undefined || data.constructor !== Array) {
           loading = false
-          morePages = false
           alert("Invalid API Key, please consider swapping key")
           document.getElementById("SwapKey").click()
           return
@@ -343,11 +344,12 @@ function RunSearch() {
         data = JSON.parse(xml.response).items
         token = JSON.parse(xml.response).nextPageToken
 
+        morePages = token !== undefined
+
         let ids = ""
 
         if (data === undefined || data.constructor !== Array) {
           loading = false
-          morePages = false
           alert("Invalid API Key, please consider swapping key")
           document.getElementById("SwapKey").click()
           return
