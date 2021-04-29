@@ -22,8 +22,7 @@ from threading import Thread
 print('host >> localhost:80')
 
 app = Flask(__name__)
-
-sio = SocketIO(app)
+sio = SocketIO(app, cors_allowed_origins='*')
 
 client_id = '645647189871165440'
 
@@ -59,8 +58,8 @@ def newData(data):
     currentDuration = int(data['data']['currentTime'])
     ping = time()
     timeDelta = currentDuration - displayData['duration']
+    displayData['duration'] = currentDuration
     if time() > sinceUpdate and (videoId != displayData['videoId'] or timeDelta > 2 or -2 > timeDelta):
-        displayData['duration'] = currentDuration
         displayData['channel'] = data['data']['channel']
         displayData['title'] = data['data']['title']
         displayData['videoId'] = data['data']['videoId']
