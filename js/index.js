@@ -1423,7 +1423,7 @@ document.getElementById('MusicLinkButton').addEventListener('click', () => {
     document.getElementById('MusicLinkClickToCloseTip').style.display = 'block'
     document.getElementById('MusicLinkButton').innerText = 'Connecting'
 
-    musicLink = io('https://yazaar.herokuapp.com', {transports: ['websocket']})
+    musicLink = iov2('https://yazaar.herokuapp.com', {transports: ['websocket']})
     musicLink.on('connect', function(){
       document.getElementById('MusicLinkButton').innerText = 'Connected'
       if (musicLinkLoop === false) {
