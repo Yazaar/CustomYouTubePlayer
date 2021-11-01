@@ -19,7 +19,35 @@ from pypresence import Presence
 from time import time, sleep
 from threading import Thread
 
-print('host >> localhost:80')
+print('host >> http://localhost:80')
+
+def parseStr(raw : str):
+    if isinstance(raw, str): res = raw
+    else: res = str(raw)
+
+    if len(res) == 1: return '0' + res
+    else: return res
+
+def parseTime(raw : int):
+    parsed = []
+    current = raw
+
+    #hours
+    if current >= 3600:
+        parsed.append(parseStr(int(current / 3600)))
+        current = current % 3600
+    #minutes
+    if current >= 60:
+        parsed.append(parseStr(int(current / 60)))
+        current = current % 60
+    #seconds
+    
+    parsed.append(parseStr(current))
+    
+    res = ':'.join(parsed)
+    
+    if len(parsed) == 1: res = '00:' + res
+    return res
 
 app = Flask(__name__)
 sio = SocketIO(app, cors_allowed_origins='*')
@@ -33,7 +61,8 @@ displayData = {
     'duration': 0,
     'videoId': '',
     'channel': '',
-    'title': ''
+    'title': '',
+    'paused': False
 }
 
 RPC = Presence(client_id,pipe=0)
@@ -41,14 +70,16 @@ RPC.connect()
 
 def t1():
     global ping, sinceUpdate
-    while displayData['videoId'] == '':
-        sleep(1)
     while True:
+        if displayData['paused'] or displayData['videoId'] == '':
+            sleep(1)
+            continue
         currentTime = time()
-        if currentTime-5 > ping and currentTime > sinceUpdate:
+        if currentTime-10 > ping and currentTime > sinceUpdate:
             ping = currentTime
             sinceUpdate = ping + 15
-            RPC.update(start=ping - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y', large_text='Playing YouTube video', small_text='Made by Yazaar')
+            displayData['paused'] = True
+            RPC.update(details=displayData['title'], state=f'{displayData["channel"]} \n| paused time: {parseTime(displayData["duration"])}', large_image='youtube', small_image='small_y', large_text='Playing YouTube video', small_text='Made by Yazaar', buttons=[{'label': 'Open YouTube', 'url': f'https://youtu.be/{displayData["videoId"]}'}])
         sleep(1)
 
 @sio.on('ScriptTalk')
@@ -59,12 +90,13 @@ def newData(data):
     ping = time()
     timeDelta = currentDuration - displayData['duration']
     displayData['duration'] = currentDuration
-    if time() > sinceUpdate and (videoId != displayData['videoId'] or timeDelta > 2 or -2 > timeDelta):
+    if time() > sinceUpdate and (videoId != displayData['videoId'] or timeDelta > 2 or -2 > timeDelta or displayData['paused']):
         displayData['channel'] = data['data']['channel']
         displayData['title'] = data['data']['title']
         displayData['videoId'] = data['data']['videoId']
+        displayData['paused'] = False
         sinceUpdate = time() + 15
-        RPC.update(start=ping - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y', large_text='Playing YouTube video', small_text='Made by Yazaar')
+        RPC.update(start=ping - displayData['duration'], details=displayData['title'], state=displayData['channel'], large_image='youtube', small_image='small_y', large_text='Playing YouTube video', small_text='Made by Yazaar', buttons=[{'label': 'Open YouTube', 'url': f'https://youtu.be/{displayData["videoId"]}'}])
 
 Thread(target=t1, daemon=True).start()
 sio.run(app, port=80)</code></pre>
